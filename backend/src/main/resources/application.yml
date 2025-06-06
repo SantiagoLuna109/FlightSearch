@@ -18,4 +18,3 @@ logging:
   level:
     com.FlightSearch.breakabletoy2: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG
-    org.springframework.web.client.HttpMessageConverterExtractor: TRACE
