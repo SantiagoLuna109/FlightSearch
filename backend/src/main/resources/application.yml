@@ -12,9 +12,10 @@ amadeus:
     key: ${AMADEUS_API_SECRET} #Change this wiht your own API Key
     secret: ${AMADEUS_API_SECRET} #CHange this wiht your own API secret
   token:
-    expiry-buffer: 3000
+    expiry-buffer: 300
 
 logging:
   level:
     com.FlightSearch.breakabletoy2: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG
+    org.springframework.web.client.HttpMessageConverterExtractor: TRACE
