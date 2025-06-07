@@ -15,6 +15,11 @@ public class Segment {
     private String duration;
     private Integer numberOfStops;
     private Boolean blacklistedInEU;
+    private String carrierName;
+
+    public String getCarrierName(){ return carrierName; }
+
+    public void setCarrierName(String carrierName){ this.carrierName = carrierName; }
 
     public Segment() {}
 

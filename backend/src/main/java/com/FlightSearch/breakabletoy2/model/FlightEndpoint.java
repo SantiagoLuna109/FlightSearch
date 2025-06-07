@@ -9,6 +9,18 @@ public class FlightEndpoint {
     private String iataCode;
     private String terminal;
     private LocalDateTime at;
+    private String airportName;
+    private String cityName;
+    private String countryCode;
+
+    public String getAirportName() { return airportName; }
+    public void setAirportName(String airportName){ this.airportName = airportName; }
+
+    public String getCityName() { return cityName; }
+    public void setCityName(String cityName) { this.cityName = cityName; }
+
+    public String getCountryCode() { return countryCode; }
+    public void setCountryCode(String countryCode) { this.countryCode = countryCode; }
 
     public FlightEndpoint() {}
 

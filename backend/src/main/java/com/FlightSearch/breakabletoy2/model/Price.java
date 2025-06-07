@@ -13,6 +13,10 @@ public class Price {
     private String grandTotal;
     private List<Fee> fees;
     private List<Tax> taxes;
+    private String currencyName;
+
+    public String getCurrencyName() { return currencyName; }
+    public void setCurrencyName(String currencyName) { this.currencyName = currencyName; }
 
     public Price() {}
 

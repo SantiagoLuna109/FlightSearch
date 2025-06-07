@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -25,8 +26,10 @@ public class FlightMapper {
             return List.of();
         }
 
+        FlightSearchResponse.Dictionaries dictionaries = response.getDictionaries();
+
         return response.getData().stream()
-                .map(this::mapToFlight)
+                .map(flightData -> mapToFlight(flightData, dictionaries))
                 .collect(Collectors.toList());
     }
 
@@ -34,7 +37,7 @@ public class FlightMapper {
         return toFlightList(response);
     }
 
-    public Flight mapToFlight(FlightSearchResponse.FlightOfferData flightOfferData) {
+    public Flight mapToFlight(FlightSearchResponse.FlightOfferData flightOfferData, FlightSearchResponse.Dictionaries dictionaries) {
         Flight flight = new Flight();
 
         flight.setId(flightOfferData.getId());
@@ -48,20 +51,20 @@ public class FlightMapper {
 
         if (flightOfferData.getItineraries() != null) {
             List<Itinerary> itineraries = flightOfferData.getItineraries().stream()
-                    .map(this::mapToItinerary)
+                    .map(itineraryData -> mapToItinerary(itineraryData, dictionaries))
                     .collect(Collectors.toList());
             flight.setItineraries(itineraries);
         }
 
         if (flightOfferData.getPrice() != null) {
-            flight.setPrice(mapToPrice(flightOfferData.getPrice()));
+            flight.setPrice(mapToPrice(flightOfferData.getPrice(), dictionaries));
         }
 
         flight.setValidatingAirlineCodes(flightOfferData.getValidatingAirlineCodes());
 
         if (flightOfferData.getTravelerPricings() != null) {
             List<TravelerPricing> travelerPricings = flightOfferData.getTravelerPricings().stream()
-                    .map(this::mapToTravelerPricing)
+                    .map(travelerPricingData -> mapToTravelerPricing(travelerPricingData, dictionaries))
                     .collect(Collectors.toList());
             flight.setTravelerPricings(travelerPricings);
         }
@@ -69,13 +72,13 @@ public class FlightMapper {
         return flight;
     }
 
-    private Itinerary mapToItinerary(FlightSearchResponse.ItineraryData itineraryData) {
+    private Itinerary mapToItinerary(FlightSearchResponse.ItineraryData itineraryData, FlightSearchResponse.Dictionaries dictionaries) {
         Itinerary itinerary = new Itinerary();
         itinerary.setDuration(itineraryData.getDuration());
 
         if (itineraryData.getSegments() != null) {
             List<Segment> segments = itineraryData.getSegments().stream()
-                    .map(this::mapToSegment)
+                    .map(segmentData -> mapToSegment(segmentData, dictionaries))
                     .collect(Collectors.toList());
             itinerary.setSegments(segments);
         }
@@ -83,50 +86,60 @@ public class FlightMapper {
         return itinerary;
     }
 
-    private Segment mapToSegment(FlightSearchResponse.SegmentData segmentData) {
+    private Segment mapToSegment(FlightSearchResponse.SegmentData segmentData, FlightSearchResponse.Dictionaries dictionaries) {
         Segment segment = new Segment();
 
         segment.setId(segmentData.getId());
         segment.setCarrierCode(segmentData.getCarrierCode());
+        segment.setCarrierName(getCarrierName(segmentData.getCarrierCode(), dictionaries));
         segment.setNumber(segmentData.getNumber());
         segment.setDuration(segmentData.getDuration());
         segment.setNumberOfStops(segmentData.getNumberOfStops());
         segment.setBlacklistedInEU(segmentData.getBlacklistedInEU());
 
         if (segmentData.getDeparture() != null) {
-            segment.setDeparture(mapToFlightEndpoint(segmentData.getDeparture()));
+            segment.setDeparture(mapToFlightEndpoint(segmentData.getDeparture(), dictionaries));
         }
 
         if (segmentData.getArrival() != null) {
-            segment.setArrival(mapToFlightEndpoint(segmentData.getArrival()));
+            segment.setArrival(mapToFlightEndpoint(segmentData.getArrival(), dictionaries));
         }
 
         if (segmentData.getAircraft() != null) {
             Aircraft aircraft = new Aircraft();
             aircraft.setCode(segmentData.getAircraft().getCode());
+            aircraft.setName(getAircraftName(segmentData.getAircraft().getCode(), dictionaries));
             segment.setAircraft(aircraft);
         }
 
         if (segmentData.getOperating() != null) {
             Operating operating = new Operating();
             operating.setCarrierCode(segmentData.getOperating().getCarrierCode());
+            operating.setCarrierName(getCarrierName(segmentData.getOperating().getCarrierCode(), dictionaries));
             segment.setOperating(operating);
         }
 
         return segment;
     }
 
-    private FlightEndpoint mapToFlightEndpoint(FlightSearchResponse.FlightEndpointData endpointData) {
+    private FlightEndpoint mapToFlightEndpoint(FlightSearchResponse.FlightEndpointData endpointData, FlightSearchResponse.Dictionaries dictionaries) {
         FlightEndpoint endpoint = new FlightEndpoint();
         endpoint.setIataCode(endpointData.getIataCode());
         endpoint.setTerminal(endpointData.getTerminal());
         endpoint.setAt(parseDateTime(endpointData.getAt()));
+
+        LocationInfo locationInfo = getLocationInfo(endpointData.getIataCode(), dictionaries);
+        endpoint.setAirportName(locationInfo.getAirportName());
+        endpoint.setCityName(locationInfo.getCityName());
+        endpoint.setCountryCode(locationInfo.getCountryCode());
+
         return endpoint;
     }
 
-    private Price mapToPrice(FlightSearchResponse.PriceData priceData) {
+    private Price mapToPrice(FlightSearchResponse.PriceData priceData, FlightSearchResponse.Dictionaries dictionaries) {
         Price price = new Price();
         price.setCurrency(priceData.getCurrency());
+        price.setCurrencyName(getCurrencyName(priceData.getCurrency(), dictionaries));
         price.setTotal(priceData.getTotal());
         price.setBase(priceData.getBase());
         price.setGrandTotal(priceData.getGrandTotal());
@@ -158,14 +171,14 @@ public class FlightMapper {
         return price;
     }
 
-    private TravelerPricing mapToTravelerPricing(FlightSearchResponse.TravelerPricingData travelerPricingData) {
+    private TravelerPricing mapToTravelerPricing(FlightSearchResponse.TravelerPricingData travelerPricingData, FlightSearchResponse.Dictionaries dictionaries) {
         TravelerPricing travelpricing = new TravelerPricing();
         travelpricing.setTravelerId(travelerPricingData.getTravelerId());
         travelpricing.setFareOption(travelerPricingData.getFareOption());
         travelpricing.setTravelerType(travelerPricingData.getTravelerType());
 
         if (travelerPricingData.getPrice() != null) {
-            travelpricing.setPrice(mapToPrice(travelerPricingData.getPrice()));
+            travelpricing.setPrice(mapToPrice(travelerPricingData.getPrice(), dictionaries));
         }
 
         if (travelerPricingData.getFareDetailsBySegment() != null) {
@@ -204,6 +217,44 @@ public class FlightMapper {
         return travelpricing;
     }
 
+    private String getCarrierName(String carrierCode, FlightSearchResponse.Dictionaries dictionaries) {
+        if (carrierCode == null || dictionaries == null || dictionaries.getCarriers() == null) {
+            return null;
+        }
+        return dictionaries.getCarriers().get(carrierCode);
+    }
+
+    private String getAircraftName(String aircraftCode, FlightSearchResponse.Dictionaries dictionaries) {
+        if (aircraftCode == null || dictionaries == null || dictionaries.getAircraft() == null) {
+            return null;
+        }
+        return dictionaries.getAircraft().get(aircraftCode);
+    }
+
+    private String getCurrencyName(String currencyCode, FlightSearchResponse.Dictionaries dictionaries) {
+        if (currencyCode == null || dictionaries == null || dictionaries.getCurrencies() == null) {
+            return null;
+        }
+        return dictionaries.getCurrencies().get(currencyCode);
+    }
+
+    private LocationInfo getLocationInfo(String iataCode, FlightSearchResponse.Dictionaries dictionaries) {
+        LocationInfo info = new LocationInfo();
+
+        if (iataCode == null || dictionaries == null || dictionaries.getLocations() == null) {
+            return info;
+        }
+
+        FlightSearchResponse.LocationDictionary location = dictionaries.getLocations().get(iataCode);
+        if (location != null) {
+            info.setCityName(location.getCityCode());
+            info.setCountryCode(location.getCountryCode());
+            info.setAirportName(iataCode);
+        }
+
+        return info;
+    }
+
     private LocalDateTime parseDateTime(String dateTimeString) {
         if (dateTimeString == null || dateTimeString.trim().isEmpty()) {
             return null;
@@ -223,5 +274,20 @@ public class FlightMapper {
 
         System.err.println("Warning: Could not parse date/time: " + dateTimeString);
         return null;
+    }
+
+    private static class LocationInfo {
+        private String airportName;
+        private String cityName;
+        private String countryCode;
+
+        public String getAirportName() { return airportName; }
+        public void setAirportName(String airportName) { this.airportName = airportName; }
+
+        public String getCityName() { return cityName; }
+        public void setCityName(String cityName) { this.cityName = cityName; }
+
+        public String getCountryCode() { return countryCode; }
+        public void setCountryCode(String countryCode) { this.countryCode = countryCode; }
     }
 }
