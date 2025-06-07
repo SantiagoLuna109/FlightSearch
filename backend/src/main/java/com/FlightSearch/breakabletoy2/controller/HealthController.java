@@ -1,5 +1,6 @@
 package com.FlightSearch.breakabletoy2.controller;
 
+import com.FlightSearch.breakabletoy2.config.AmadeusProperties;
 import com.FlightSearch.breakabletoy2.model.auth.AmadeusTokenResponse;
 import com.FlightSearch.breakabletoy2.service.AmadeusAuthService;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,11 @@ import java.util.Map;
 public class HealthController {
 
     private final AmadeusAuthService authService;
+    private final AmadeusProperties properties;
 
-    public HealthController(AmadeusAuthService authService) {
+    public HealthController(AmadeusAuthService authService, AmadeusProperties properties) {
         this.authService = authService;
+        this.properties = properties;
     }
 
     @GetMapping
@@ -47,5 +50,23 @@ public class HealthController {
             response.put("error", e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
+    }
+
+    @GetMapping("/config-check")
+    public ResponseEntity<Map<String, Object>> checkConfig() {
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("baseUrl", properties.getApi().getBaseUrl());
+        response.put("authUrl", properties.getApi().getFullAuthUrl());
+        response.put("apiKeyPresent", properties.getApi().getKey() != null && !properties.getApi().getKey().isEmpty());
+        response.put("apiSecretPresent", properties.getApi().getSecret() != null && !properties.getApi().getSecret().isEmpty());
+        response.put("expiryBuffer", properties.getToken().getExpiryBuffer());
+
+        if (properties.getApi().getKey() != null) {
+            response.put("apiKeyLength", properties.getApi().getKey().length());
+            response.put("apiKeyStartsWith", properties.getApi().getKey().substring(0, Math.min(5, properties.getApi().getKey().length())));
+        }
+
+        return ResponseEntity.ok(response);
     }
 }

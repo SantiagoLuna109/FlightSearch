@@ -12,17 +12,12 @@ import java.time.Duration;
 @Configuration
 public class AmadeusConfig {
 
-    @Value("${amadeus.api.base-url}")
-    private String baseUrl;
+    private final AmadeusProperties properties;
 
-    @Value("${amadeus.api.key}")
-    private String apiKey;
+    public AmadeusConfig(AmadeusProperties properties) {
+        this.properties = properties;
+    }
 
-    @Value("${amadeus.api.secret}")
-    private String apiSecret;
-
-    @Value("${amadeus.token.expiry-buffer}")
-    private Integer expiryBuffer;
 
     @Bean
     public RestTemplate restTemplate() {
@@ -57,21 +52,5 @@ public class AmadeusConfig {
             System.out.println("Request Method: " + request.getMethod());
             return execution.execute(request, body);
         };
-    }
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public String getApiSecret() {
-        return apiSecret;
-    }
-
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-
-    public Integer getExpiryBuffer() {
-        return expiryBuffer;
     }
 }
