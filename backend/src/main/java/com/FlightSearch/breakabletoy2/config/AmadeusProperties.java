@@ -21,7 +21,12 @@ public class AmadeusProperties {
     public static class Api {
         @NotBlank(message = "Amadeus API base URL is required")
         private String baseUrl;
+
         private String authUrl;
+
+        private String baseUrlV1;
+
+        private String baseUrlV2;
 
         @NotBlank(message = "Amadeus API key is required")
         private String key;
@@ -43,6 +48,22 @@ public class AmadeusProperties {
 
         public void setAuthUrl(String authUrl) {
             this.authUrl = authUrl;
+        }
+
+        public String getBaseUrlV1() {
+            return baseUrlV1;
+        }
+
+        public void setBaseUrlV1(String baseUrlV1) {
+            this.baseUrlV1 = baseUrlV1;
+        }
+
+        public String getBaseUrlV2() {
+            return baseUrlV2;
+        }
+
+        public void setBaseUrlV2(String baseUrlV2) {
+            this.baseUrlV2 = baseUrlV2;
         }
 
         public String getKey() {

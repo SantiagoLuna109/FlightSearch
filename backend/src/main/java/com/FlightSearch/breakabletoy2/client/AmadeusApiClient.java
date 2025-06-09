@@ -1,5 +1,6 @@
 package com.FlightSearch.breakabletoy2.client;
 
+import com.FlightSearch.breakabletoy2.config.AmadeusConfig.AmadeusUrlConfig;
 import com.FlightSearch.breakabletoy2.model.amadeus.LocationResponse;
 import com.FlightSearch.breakabletoy2.exception.AmadeusApiException;
 import com.FlightSearch.breakabletoy2.service.AmadeusAuthService;
@@ -18,23 +19,25 @@ import java.net.URI;
 public class AmadeusApiClient {
 
     private static final Logger logger = LoggerFactory.getLogger(AmadeusApiClient.class);
-    private static final String BASE_URL = "https://test.api.amadeus.com/v1";
 
     private final RestTemplate restTemplate;
     private final AmadeusAuthService authService;
+    private final AmadeusUrlConfig urlConfig;
 
-    public AmadeusApiClient(RestTemplate restTemplate, AmadeusAuthService authService) {
+    public AmadeusApiClient(RestTemplate restTemplate,
+                            AmadeusAuthService authService,
+                            AmadeusUrlConfig urlConfig) {
         this.restTemplate = restTemplate;
         this.authService = authService;
+        this.urlConfig = urlConfig;
     }
 
     public LocationResponse searchLocations(String keyword, String subType, int limit) {
         try {
             logger.info("Searching locations - keyword: '{}', subType: '{}', limit: {}", keyword, subType, limit);
 
-            // Construir URL con parámetros
             URI uri = UriComponentsBuilder
-                    .fromHttpUrl(BASE_URL + "/reference-data/locations")
+                    .fromHttpUrl(urlConfig.getBaseUrlV1() + "/reference-data/locations")
                     .queryParam("keyword", keyword)
                     .queryParam("subType", subType)
                     .queryParam("page[limit]", limit)
@@ -45,11 +48,9 @@ public class AmadeusApiClient {
 
             logger.debug("Request URL: {}", uri);
 
-            // Preparar headers con token de autorización
             HttpHeaders headers = createAuthHeaders();
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            // Realizar llamada
             ResponseEntity<LocationResponse> response = restTemplate.exchange(
                     uri,
                     HttpMethod.GET,
@@ -86,15 +87,12 @@ public class AmadeusApiClient {
         try {
             logger.info("Getting location by ID: '{}'", locationId);
 
-            // Construir URL
-            String url = BASE_URL + "/reference-data/locations/" + locationId;
+            String url = urlConfig.getBaseUrlV1() + "/reference-data/locations/" + locationId;
             logger.debug("Request URL: {}", url);
 
-            // Preparar headers con token de autorización
             HttpHeaders headers = createAuthHeaders();
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            // Realizar llamada
             ResponseEntity<LocationResponse> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
