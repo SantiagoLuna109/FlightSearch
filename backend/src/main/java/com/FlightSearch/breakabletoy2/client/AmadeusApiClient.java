@@ -19,11 +19,12 @@ import java.net.URI;
 public class AmadeusApiClient {
 
     private static final Logger logger = LoggerFactory.getLogger(AmadeusApiClient.class);
-
+    private static final String REFERENCE_DATA_LOCATION_JUANDICE = "/reference-data/locations";
+    private static final String URL_ANALITICS= "analytics.travelers.score";
+    private static final String URL_PARAM = "FULL";
     private final RestTemplate restTemplate;
     private final AmadeusAuthService authService;
     private final AmadeusUrlConfig urlConfig;
-
     public AmadeusApiClient(RestTemplate restTemplate,
                             AmadeusAuthService authService,
                             AmadeusUrlConfig urlConfig) {
@@ -37,12 +38,12 @@ public class AmadeusApiClient {
             logger.info("Searching locations - keyword: '{}', subType: '{}', limit: {}", keyword, subType, limit);
 
             URI uri = UriComponentsBuilder
-                    .fromHttpUrl(urlConfig.getBaseUrlV1() + "/reference-data/locations")
+                    .fromHttpUrl(urlConfig.getBaseUrlV1() + REFERENCE_DATA_LOCATION_JUANDICE)
                     .queryParam("keyword", keyword)
                     .queryParam("subType", subType)
                     .queryParam("page[limit]", limit)
-                    .queryParam("sort", "analytics.travelers.score")
-                    .queryParam("view", "FULL")
+                    .queryParam("sort", URL_ANALITICS)
+                    .queryParam("view", URL_PARAM)
                     .build()
                     .toUri();
 
@@ -81,6 +82,7 @@ public class AmadeusApiClient {
             logger.error("Unexpected error calling Amadeus API: {}", e.getMessage(), e);
             throw new AmadeusApiException("Unexpected error calling Amadeus API: " + e.getMessage(), e);
         }
+
     }
 
     public LocationResponse getLocationById(String locationId) {
@@ -139,7 +141,7 @@ public class AmadeusApiClient {
         try {
             String token = authService.getAccessToken();
 
-            HttpHeaders headers = new HttpHeaders();
+            final HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + token);
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Accept", "application/vnd.amadeus+json");

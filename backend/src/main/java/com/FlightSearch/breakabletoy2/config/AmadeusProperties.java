@@ -18,6 +18,8 @@ public class AmadeusProperties {
     @NotNull
     private Token token = new Token();
 
+    private static final String URL_TOKEN = "/v1/security/oauth2/token";
+
     public static class Api {
         @NotBlank(message = "Amadeus API base URL is required")
         private String baseUrl;
@@ -83,7 +85,7 @@ public class AmadeusProperties {
         }
 
         public String getFullAuthUrl() {
-            return authUrl != null ? authUrl : baseUrl + "/v1/security/oauth2/token";
+            return authUrl != null ? authUrl : baseUrl + URL_TOKEN;
         }
     }
 
