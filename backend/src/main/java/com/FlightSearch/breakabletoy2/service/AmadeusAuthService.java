@@ -46,7 +46,7 @@ public class AmadeusAuthService {
             try {
                 logger.info("Requesting new access token from Amadeus");
 
-                String authUrl = properties.getApi().getFullAuthUrl();
+                final String authUrl = properties.getApi().getFullAuthUrl();
                 logger.debug("Auth URL: {}", authUrl);
 
                 logger.debug("API Key present: {}", properties.getApi().getKey() != null && !properties.getApi().getKey().isEmpty());
