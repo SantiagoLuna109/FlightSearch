@@ -8,6 +8,8 @@ server:
 amadeus:
   api:
     base-url: https://test.api.amadeus.com
+    base-url-v1: ${amadeus.api.base-url}/v1
+    base-url-v2: ${amadeus.api.base-url}/v2
     auth-url: ${amadeus.api.base-url}/v1/security/oauth2/token
     key: ${AMADEUS_API_SECRET} #Change this wiht your own API Key
     secret: ${AMADEUS_API_SECRET} #CHange this wiht your own API secret
