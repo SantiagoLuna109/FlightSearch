@@ -18,10 +18,17 @@ public class AmadeusProperties {
     @NotNull
     private Token token = new Token();
 
+    private static final String URL_TOKEN = "/v1/security/oauth2/token";
+
     public static class Api {
         @NotBlank(message = "Amadeus API base URL is required")
         private String baseUrl;
+
         private String authUrl;
+
+        private String baseUrlV1;
+
+        private String baseUrlV2;
 
         @NotBlank(message = "Amadeus API key is required")
         private String key;
@@ -45,6 +52,22 @@ public class AmadeusProperties {
             this.authUrl = authUrl;
         }
 
+        public String getBaseUrlV1() {
+            return baseUrlV1;
+        }
+
+        public void setBaseUrlV1(String baseUrlV1) {
+            this.baseUrlV1 = baseUrlV1;
+        }
+
+        public String getBaseUrlV2() {
+            return baseUrlV2;
+        }
+
+        public void setBaseUrlV2(String baseUrlV2) {
+            this.baseUrlV2 = baseUrlV2;
+        }
+
         public String getKey() {
             return key;
         }
@@ -62,7 +85,7 @@ public class AmadeusProperties {
         }
 
         public String getFullAuthUrl() {
-            return authUrl != null ? authUrl : baseUrl + "/v1/security/oauth2/token";
+            return authUrl != null ? authUrl : baseUrl + URL_TOKEN;
         }
     }
 
