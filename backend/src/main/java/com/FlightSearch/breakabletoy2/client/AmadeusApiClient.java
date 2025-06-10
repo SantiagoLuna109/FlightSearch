@@ -22,6 +22,8 @@ public class AmadeusApiClient {
     private static final String REFERENCE_DATA_LOCATION_JUANDICE = "/reference-data/locations";
     private static final String URL_ANALITICS= "analytics.travelers.score";
     private static final String URL_PARAM = "FULL";
+    private static final String URL_REFERENCE = "/reference-data/locations/";
+    private static final String AMADEUS_JSON = "application/vnd.amadeus+json";
     private final RestTemplate restTemplate;
     private final AmadeusAuthService authService;
     private final AmadeusUrlConfig urlConfig;
@@ -89,7 +91,7 @@ public class AmadeusApiClient {
         try {
             logger.info("Getting location by ID: '{}'", locationId);
 
-            String url = urlConfig.getBaseUrlV1() + "/reference-data/locations/" + locationId;
+            String url = urlConfig.getBaseUrlV1() + URL_REFERENCE + locationId;
             logger.debug("Request URL: {}", url);
 
             HttpHeaders headers = createAuthHeaders();
@@ -144,7 +146,7 @@ public class AmadeusApiClient {
             final HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + token);
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Accept", "application/vnd.amadeus+json");
+            headers.set("Accept", AMADEUS_JSON);
 
             return headers;
         } catch (Exception e) {
