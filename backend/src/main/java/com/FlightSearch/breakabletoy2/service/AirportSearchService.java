@@ -31,7 +31,7 @@ public class AirportSearchService {
         try {
             logger.info("Searching airports with keyword: '{}', subType: '{}', limit: {}", keyword, subType, limit);
 
-            // Validaciones
+            // un saludo
             if (keyword == null || keyword.trim().isEmpty()) {
                 throw new IllegalArgumentException("Keyword cannot be null or empty");
             }
@@ -41,7 +41,7 @@ public class AirportSearchService {
                 throw new IllegalArgumentException("Keyword must be at least 2 characters long");
             }
 
-            // Llamada a la API de Amadeus
+            // otro saludo
             LocationResponse response = amadeusApiClient.searchLocations(cleanKeyword, subType, limit);
 
             if (response == null) {
@@ -54,10 +54,10 @@ public class AirportSearchService {
                 return Collections.emptyList();
             }
 
-            // Mapear respuesta a modelo
+
             List<Airport> airports = response.getData().stream()
                     .map(airportMapper::toAirport)
-                    .filter(airport -> airport != null) // Filtrar nulls por si hay errores de mapeo
+                    .filter(airport -> airport != null)
                     .collect(Collectors.toList());
 
             logger.info("Found {} airports for keyword: {}", airports.size(), cleanKeyword);
@@ -79,7 +79,7 @@ public class AirportSearchService {
         try {
             logger.info("Searching locations with keyword: '{}', subType: '{}', limit: {}", keyword, subType, limit);
 
-            // Validaciones
+
             if (keyword == null || keyword.trim().isEmpty()) {
                 throw new IllegalArgumentException("Keyword cannot be null or empty");
             }
@@ -89,7 +89,7 @@ public class AirportSearchService {
                 throw new IllegalArgumentException("Keyword must be at least 2 characters long");
             }
 
-            // Llamada a la API de Amadeus - puede incluir tanto aeropuertos como ciudades
+
             LocationResponse response = amadeusApiClient.searchLocations(cleanKeyword, subType, limit);
 
             if (response == null) {
@@ -102,10 +102,10 @@ public class AirportSearchService {
                 return Collections.emptyList();
             }
 
-            // Mapear respuesta a modelo
+
             List<Airport> locations = response.getData().stream()
                     .map(airportMapper::toAirport)
-                    .filter(location -> location != null) // Filtrar nulls por si hay errores de mapeo
+                    .filter(location -> location != null)
                     .collect(Collectors.toList());
 
             logger.info("Found {} locations for keyword: {}", locations.size(), cleanKeyword);
@@ -127,7 +127,7 @@ public class AirportSearchService {
         try {
             logger.info("Getting airport details for code: '{}'", code);
 
-            // Validaciones
+
             if (code == null || code.trim().isEmpty()) {
                 throw new IllegalArgumentException("Airport code cannot be null or empty");
             }
@@ -137,7 +137,7 @@ public class AirportSearchService {
                 throw new IllegalArgumentException("Airport code must be 3 or 4 characters long");
             }
 
-            // Llamada a la API de Amadeus para obtener detalles específicos
+            // otro saludo
             LocationResponse response = amadeusApiClient.getLocationById(cleanCode);
 
             if (response == null || response.getData() == null) {
@@ -145,13 +145,12 @@ public class AirportSearchService {
                 throw new AirportNotFoundException("Airport with code '" + cleanCode + "' not found");
             }
 
-            // Para getLocationById, el response.getData() debería ser un solo objeto
-            // pero como la estructura es una lista, tomamos el primer elemento
+
             if (response.getData().isEmpty()) {
                 throw new AirportNotFoundException("Airport with code '" + cleanCode + "' not found");
             }
 
-            Airport airport = airportMapper.toAirport(response.getData().get(0));
+            final Airport airport = airportMapper.toAirport(response.getData().get(0));
 
             if (airport == null) {
                 logger.error("Failed to map airport data for code: {}", cleanCode);
@@ -176,7 +175,7 @@ public class AirportSearchService {
         }
     }
 
-    // Métodos auxiliares para casos específicos
+
     public List<Airport> searchAirportsOnly(String keyword, int limit) {
         return searchAirports(keyword, "AIRPORT", limit);
     }
