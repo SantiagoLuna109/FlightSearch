@@ -26,6 +26,7 @@ public class AmadeusApiClient {
     private static final String URL_PARAM = "FULL";
     private static final String URL_REFERENCE = "/reference-data/locations/";
     private static final String AMADEUS_JSON = "application/vnd.amadeus+json";
+    private static final String SHOPPING_URL = "/shopping/flight-offers";
     private final RestTemplate restTemplate;
     private final AmadeusAuthService authService;
     private final AmadeusUrlConfig urlConfig;
@@ -85,6 +86,52 @@ public class AmadeusApiClient {
         } catch (Exception e) {
             logger.error("Unexpected error calling Amadeus API: {}", e.getMessage(), e);
             throw new AmadeusApiException("Unexpected error calling Amadeus API: " + e.getMessage(), e);
+        }
+    }
+
+    public FlightOffersResponse searchFlights(Map<String, String> params) {
+        try {
+            logger.info("Searching flights with parameters: {}", params);
+
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromHttpUrl(urlConfig.getBaseUrlV2() + SHOPPING_URL);
+
+            params.forEach(builder::queryParam);
+
+            URI uri = builder.build().toUri();
+            logger.debug("Flight search URL: {}", uri);
+
+            HttpHeaders headers = createAuthHeaders();
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<FlightOffersResponse> response = restTemplate.exchange(
+                    uri,
+                    HttpMethod.GET,
+                    entity,
+                    FlightOffersResponse.class
+            );
+
+            FlightOffersResponse flightResponse = response.getBody();
+
+            if (flightResponse != null && flightResponse.getData() != null) {
+                logger.info("Successfully retrieved {} flight offers", flightResponse.getData().size());
+            } else {
+                logger.warn("Received empty or null flight response");
+            }
+
+            return flightResponse;
+
+        } catch (HttpClientErrorException e) {
+            logger.error("Client error searching flights - Status: {}, Body: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new AmadeusApiException("Flight search client error: " + e.getMessage(), e);
+        } catch (HttpServerErrorException e) {
+            logger.error("Server error searching flights - Status: {}, Body: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new AmadeusApiException("Flight search server error: " + e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Unexpected error searching flights: {}", e.getMessage(), e);
+            throw new AmadeusApiException("Unexpected error searching flights: " + e.getMessage(), e);
         }
     }
 
