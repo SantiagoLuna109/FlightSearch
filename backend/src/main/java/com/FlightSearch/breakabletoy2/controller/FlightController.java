@@ -5,6 +5,7 @@ import com.FlightSearch.breakabletoy2.exception.AmadeusApiException;
 import com.FlightSearch.breakabletoy2.model.Flight;
 import com.FlightSearch.breakabletoy2.service.FlightSearchService;
 import com.FlightSearch.breakabletoy2.service.FlightFilterService;
+import com.FlightSearch.breakabletoy2.service.CurrencyConversionService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -34,10 +35,14 @@ public class FlightController {
 
     private final FlightSearchService flightSearchService;
     private final FlightFilterService flightFilterService;
+    private final CurrencyConversionService currencyConversionService;
 
-    public FlightController(FlightSearchService flightSearchService, FlightFilterService flightFilterService) {
+    public FlightController(FlightSearchService flightSearchService,
+                            FlightFilterService flightFilterService,
+                            CurrencyConversionService currencyConversionService) {
         this.flightSearchService = flightSearchService;
         this.flightFilterService = flightFilterService;
+        this.currencyConversionService = currencyConversionService;
     }
 
     @PostMapping("/search")
@@ -300,7 +305,8 @@ public class FlightController {
                         "sortBy", List.of("price", "duration", "departure", "arrival", "stops", "airline"),
                         "sortOrder", List.of("asc", "desc")
                 ),
-                "currencies", List.of("USD", "EUR", "MXN"),
+                "currencies", currencyConversionService.getSupportedCurrencies(),
+                "currencyRatesDate", currencyConversionService.getRatesDate(),
                 "timeRangeFormat", "HH:MM (24-hour format)",
                 "maxDurationHours", 48
         );

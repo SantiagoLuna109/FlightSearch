@@ -3,11 +3,12 @@ package com.FlightSearch.breakabletoy2.service;
 import com.FlightSearch.breakabletoy2.client.AmadeusApiClient;
 import com.FlightSearch.breakabletoy2.dto.FlightSearchRequest;
 import com.FlightSearch.breakabletoy2.exception.AmadeusApiException;
+import com.FlightSearch.breakabletoy2.exception.CurrencyConversionException;
 import com.FlightSearch.breakabletoy2.exception.FlightNotFoundException;
 import com.FlightSearch.breakabletoy2.mapper.FlightMapper;
 import com.FlightSearch.breakabletoy2.model.Flight;
+import com.FlightSearch.breakabletoy2.model.PriceWithConversion;
 import com.FlightSearch.breakabletoy2.model.amadeus.FlightOffersResponse;
-import com.FlightSearch.breakabletoy2.service.FlightFilterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,11 +28,14 @@ public class FlightSearchService {
     private final AmadeusApiClient amadeusApiClient;
     private final FlightMapper flightMapper;
     private final FlightFilterService flightFilterService;
+    private final CurrencyConversionService currencyConversionService;
 
-    public FlightSearchService(AmadeusApiClient amadeusApiClient, FlightMapper flightMapper, FlightFilterService flightFilterService) {
+    public FlightSearchService(AmadeusApiClient amadeusApiClient, FlightMapper flightMapper,
+                               FlightFilterService flightFilterService, CurrencyConversionService currencyConversionService) {
         this.amadeusApiClient = amadeusApiClient;
         this.flightMapper = flightMapper;
         this.flightFilterService = flightFilterService;
+        this.currencyConversionService = currencyConversionService;
     }
 
     public List<Flight> searchFlights(FlightSearchRequest request) {
@@ -54,6 +58,10 @@ public class FlightSearchService {
 
             flights = flightFilterService.applyFilters(flights, request);
 
+            if (request.getCurrencyCode() != null && !request.getCurrencyCode().isEmpty()) {
+                flights = applyCurrencyConversion(flights, request.getCurrencyCode());
+            }
+
             logger.info("Found {} flights after filtering for request: {}", flights.size(), request);
             return flights;
 
@@ -66,12 +74,76 @@ public class FlightSearchService {
         }
     }
 
+    private List<Flight> applyCurrencyConversion(List<Flight> flights, String targetCurrency) {
+        return flights.stream()
+                .map(flight -> {
+                    try {
+                        applyConversionToFlight(flight, targetCurrency);
+                    } catch (CurrencyConversionException e) {
+                        logger.warn("Failed to convert currency for flight {}: {}",
+                                flight.getId(), e.getMessage());
+                    }
+                    return flight;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private void applyConversionToFlight(Flight flight, String targetCurrency) {
+        if (flight.getPrice() == null || flight.getPrice().getCurrency() == null) {
+            return;
+        }
+
+        String originalCurrency = flight.getPrice().getCurrency();
+
+        if (originalCurrency.equalsIgnoreCase(targetCurrency)) {
+            return;
+        }
+
+        PriceWithConversion priceWithConversion = new PriceWithConversion(flight.getPrice());
+        priceWithConversion.setRequestedCurrency(targetCurrency.toUpperCase());
+
+        try {
+            BigDecimal originalTotal = new BigDecimal(flight.getPrice().getTotal());
+            BigDecimal convertedTotal = currencyConversionService.convert(
+                    originalTotal, originalCurrency, targetCurrency);
+            priceWithConversion.setConvertedTotal(convertedTotal);
+
+            if (flight.getPrice().getBase() != null) {
+                BigDecimal originalBase = new BigDecimal(flight.getPrice().getBase());
+                BigDecimal convertedBase = currencyConversionService.convert(
+                        originalBase, originalCurrency, targetCurrency);
+                priceWithConversion.setConvertedBase(convertedBase);
+            }
+
+            if (flight.getPrice().getGrandTotal() != null) {
+                BigDecimal originalGrandTotal = new BigDecimal(flight.getPrice().getGrandTotal());
+                BigDecimal convertedGrandTotal = currencyConversionService.convert(
+                        originalGrandTotal, originalCurrency, targetCurrency);
+                priceWithConversion.setConvertedGrandTotal(convertedGrandTotal);
+            }
+
+            BigDecimal exchangeRate = currencyConversionService.getExchangeRate(
+                    originalCurrency, targetCurrency);
+            priceWithConversion.setExchangeRate(exchangeRate);
+            priceWithConversion.setConversionDate(currencyConversionService.getRatesDate());
+            priceWithConversion.setConversionApplied(true);
+
+            flight.setPriceWithConversion(priceWithConversion);
+
+        } catch (Exception e) {
+            logger.error("Error converting price for flight {}: {}", flight.getId(), e.getMessage());
+            priceWithConversion.setConversionApplied(false);
+            flight.setPriceWithConversion(priceWithConversion);
+        }
+    }
+
     public List<Flight> searchFlightsAndSort(FlightSearchRequest request, String sortBy) {
         List<Flight> flights = searchFlights(request);
         return sortFlights(flights, sortBy, request.getSortOrder());
     }
 
-    public List<Flight> searchOneWayFlights(String origin, String destination, LocalDate departureDate, Integer adults, String currency) {
+    public List<Flight> searchOneWayFlights(String origin, String destination, LocalDate departureDate,
+                                            Integer adults, String currency) {
         FlightSearchRequest request = new FlightSearchRequest();
         request.setOriginLocationCode(origin);
         request.setDestinationLocationCode(destination);
@@ -83,7 +155,8 @@ public class FlightSearchService {
         return searchFlights(request);
     }
 
-    public List<Flight> searchRoundTripFlights(String origin, String destination, LocalDate departureDate, LocalDate returnDate, Integer adults, String currency) {
+    public List<Flight> searchRoundTripFlights(String origin, String destination, LocalDate departureDate,
+                                               LocalDate returnDate, Integer adults, String currency) {
         FlightSearchRequest request = new FlightSearchRequest();
         request.setOriginLocationCode(origin);
         request.setDestinationLocationCode(destination);
@@ -131,10 +204,16 @@ public class FlightSearchService {
 
         switch (sortBy) {
             case "price":
-                comparator = Comparator.comparing(flight ->
-                        flight.getPrice() != null && flight.getPrice().getTotal() != null
-                                ? new BigDecimal(flight.getPrice().getTotal())
-                                : BigDecimal.ZERO);
+                comparator = Comparator.comparing(flight -> {
+                    if (flight.getPriceWithConversion() != null &&
+                            flight.getPriceWithConversion().isConversionApplied() &&
+                            flight.getPriceWithConversion().getConvertedTotal() != null) {
+                        return flight.getPriceWithConversion().getConvertedTotal();
+                    } else if (flight.getPrice() != null && flight.getPrice().getTotal() != null) {
+                        return new BigDecimal(flight.getPrice().getTotal());
+                    }
+                    return BigDecimal.ZERO;
+                });
                 break;
 
             case "duration":
@@ -178,10 +257,16 @@ public class FlightSearchService {
 
             default:
                 logger.warn("Unknown sort field: {}, defaulting to price", sortBy);
-                comparator = Comparator.comparing(flight ->
-                        flight.getPrice() != null && flight.getPrice().getTotal() != null
-                                ? new BigDecimal(flight.getPrice().getTotal())
-                                : BigDecimal.ZERO);
+                comparator = Comparator.comparing(flight -> {
+                    if (flight.getPriceWithConversion() != null &&
+                            flight.getPriceWithConversion().isConversionApplied() &&
+                            flight.getPriceWithConversion().getConvertedTotal() != null) {
+                        return flight.getPriceWithConversion().getConvertedTotal();
+                    } else if (flight.getPrice() != null && flight.getPrice().getTotal() != null) {
+                        return new BigDecimal(flight.getPrice().getTotal());
+                    }
+                    return BigDecimal.ZERO;
+                });
         }
 
         return ascending ? comparator : comparator.reversed();
@@ -258,6 +343,13 @@ public class FlightSearchService {
         int totalPassengers = request.getAdults() + (request.getChildren() != null ? request.getChildren() : 0);
         if (totalPassengers > 9) {
             throw new IllegalArgumentException("Total passengers (adults + children) cannot exceed 9");
+        }
+
+        if (request.getCurrencyCode() != null && !request.getCurrencyCode().isEmpty()) {
+            if (!currencyConversionService.isSupported(request.getCurrencyCode())) {
+                throw new IllegalArgumentException("Unsupported currency: " + request.getCurrencyCode() +
+                        ". Supported currencies are: " + currencyConversionService.getSupportedCurrencies());
+            }
         }
 
         if (request.getMaxStops() != null && (request.getMaxStops() < 0 || request.getMaxStops() > 3)) {

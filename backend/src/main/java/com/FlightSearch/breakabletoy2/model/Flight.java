@@ -18,6 +18,7 @@ public class Flight {
 
     private List<Itinerary> itineraries;
     private Price price;
+    private PriceWithConversion priceWithConversion;
     private List<String> validatingAirlineCodes;
     private List<TravelerPricing> travelerPricings;
 
@@ -52,6 +53,9 @@ public class Flight {
 
     public Price getPrice() { return price; }
     public void setPrice(Price price) { this.price = price; }
+
+    public PriceWithConversion getPriceWithConversion() { return priceWithConversion; }
+    public void setPriceWithConversion(PriceWithConversion priceWithConversion) { this.priceWithConversion = priceWithConversion; }
 
     public List<String> getValidatingAirlineCodes() { return validatingAirlineCodes; }
     public void setValidatingAirlineCodes(List<String> validatingAirlineCodes) { this.validatingAirlineCodes = validatingAirlineCodes; }
