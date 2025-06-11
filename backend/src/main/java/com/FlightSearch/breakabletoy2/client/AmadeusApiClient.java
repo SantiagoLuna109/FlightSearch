@@ -1,6 +1,8 @@
 package com.FlightSearch.breakabletoy2.client;
 
+import com.FlightSearch.breakabletoy2.config.AmadeusConfig.AmadeusUrlConfig;
 import com.FlightSearch.breakabletoy2.model.amadeus.LocationResponse;
+import com.FlightSearch.breakabletoy2.model.amadeus.FlightOffersResponse;
 import com.FlightSearch.breakabletoy2.exception.AmadeusApiException;
 import com.FlightSearch.breakabletoy2.service.AmadeusAuthService;
 import org.slf4j.Logger;
@@ -13,43 +15,48 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Map;
 
 @Component
 public class AmadeusApiClient {
 
     private static final Logger logger = LoggerFactory.getLogger(AmadeusApiClient.class);
-    private static final String BASE_URL = "https://test.api.amadeus.com/v1";
-
+    private static final String REFERENCE_DATA_LOCATION_JUANDICE = "/reference-data/locations";
+    private static final String URL_ANALITICS= "analytics.travelers.score";
+    private static final String URL_PARAM = "FULL";
+    private static final String URL_REFERENCE = "/reference-data/locations/";
+    private static final String AMADEUS_JSON = "application/vnd.amadeus+json";
+    private static final String SHOPPING_URL = "/shopping/flight-offers";
     private final RestTemplate restTemplate;
     private final AmadeusAuthService authService;
-
-    public AmadeusApiClient(RestTemplate restTemplate, AmadeusAuthService authService) {
+    private final AmadeusUrlConfig urlConfig;
+    public AmadeusApiClient(RestTemplate restTemplate,
+                            AmadeusAuthService authService,
+                            AmadeusUrlConfig urlConfig) {
         this.restTemplate = restTemplate;
         this.authService = authService;
+        this.urlConfig = urlConfig;
     }
 
     public LocationResponse searchLocations(String keyword, String subType, int limit) {
         try {
             logger.info("Searching locations - keyword: '{}', subType: '{}', limit: {}", keyword, subType, limit);
 
-            // Construir URL con parámetros
             URI uri = UriComponentsBuilder
-                    .fromHttpUrl(BASE_URL + "/reference-data/locations")
+                    .fromHttpUrl(urlConfig.getBaseUrlV1() + REFERENCE_DATA_LOCATION_JUANDICE)
                     .queryParam("keyword", keyword)
                     .queryParam("subType", subType)
                     .queryParam("page[limit]", limit)
-                    .queryParam("sort", "analytics.travelers.score")
-                    .queryParam("view", "FULL")
+                    .queryParam("sort", URL_ANALITICS)
+                    .queryParam("view", URL_PARAM)
                     .build()
                     .toUri();
 
             logger.debug("Request URL: {}", uri);
 
-            // Preparar headers con token de autorización
             HttpHeaders headers = createAuthHeaders();
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            // Realizar llamada
             ResponseEntity<LocationResponse> response = restTemplate.exchange(
                     uri,
                     HttpMethod.GET,
@@ -82,19 +89,62 @@ public class AmadeusApiClient {
         }
     }
 
+    public FlightOffersResponse searchFlights(Map<String, String> params) {
+        try {
+            logger.info("Searching flights with parameters: {}", params);
+
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromHttpUrl(urlConfig.getBaseUrlV2() + SHOPPING_URL);
+
+            params.forEach(builder::queryParam);
+
+            URI uri = builder.build().toUri();
+            logger.debug("Flight search URL: {}", uri);
+
+            HttpHeaders headers = createAuthHeaders();
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<FlightOffersResponse> response = restTemplate.exchange(
+                    uri,
+                    HttpMethod.GET,
+                    entity,
+                    FlightOffersResponse.class
+            );
+
+            FlightOffersResponse flightResponse = response.getBody();
+
+            if (flightResponse != null && flightResponse.getData() != null) {
+                logger.info("Successfully retrieved {} flight offers", flightResponse.getData().size());
+            } else {
+                logger.warn("Received empty or null flight response");
+            }
+
+            return flightResponse;
+
+        } catch (HttpClientErrorException e) {
+            logger.error("Client error searching flights - Status: {}, Body: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new AmadeusApiException("Flight search client error: " + e.getMessage(), e);
+        } catch (HttpServerErrorException e) {
+            logger.error("Server error searching flights - Status: {}, Body: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new AmadeusApiException("Flight search server error: " + e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Unexpected error searching flights: {}", e.getMessage(), e);
+            throw new AmadeusApiException("Unexpected error searching flights: " + e.getMessage(), e);
+        }
+    }
+
     public LocationResponse getLocationById(String locationId) {
         try {
             logger.info("Getting location by ID: '{}'", locationId);
 
-            // Construir URL
-            String url = BASE_URL + "/reference-data/locations/" + locationId;
+            String url = urlConfig.getBaseUrlV1() + URL_REFERENCE + locationId;
             logger.debug("Request URL: {}", url);
 
-            // Preparar headers con token de autorización
             HttpHeaders headers = createAuthHeaders();
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            // Realizar llamada
             ResponseEntity<LocationResponse> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -141,10 +191,10 @@ public class AmadeusApiClient {
         try {
             String token = authService.getAccessToken();
 
-            HttpHeaders headers = new HttpHeaders();
+            final HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + token);
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Accept", "application/vnd.amadeus+json");
+            headers.set("Accept", AMADEUS_JSON);
 
             return headers;
         } catch (Exception e) {
