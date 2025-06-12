@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useMemo } from 'react'
-import { parseISO, differenceInMinutes } from 'date-fns'
 import FlightCard from '../components/FlightCard'
 import Pagination from '../components/Pagination'
 
@@ -11,26 +10,23 @@ export default function ResultsPage() {
   const offers = state?.offers ?? []
   const search = state?.search ?? {}
 
+  const durMinutes = (isoDur: string) => {
+    const [, h = '0', m = '0'] = isoDur.match(/PT(?:(\d+)H)?(?:(\d+)M)?/) || []
+    return parseInt(h, 10) * 60 + parseInt(m, 10)
+  }
+
   const [priceAsc, setPriceAsc] = useState(true)
   const [durAsc, setDurAsc] = useState(true)
   const [page, setPage] = useState(0)
 
   const sorted = useMemo(() => {
-    const price = (o: any) => Number(o.price.grandTotal)
-    const dur = (o: any) =>
-      o.itineraries.reduce(
-        (m: number, it: any) =>
-          m +
-          differenceInMinutes(
-            parseISO(it.segments.at(-1)!.arrival.at),
-            parseISO(it.segments[0].departure.at)
-          ),
-        0
-      )
+    const priceVal = (o: any) => Number(o.price.grandTotal)
+    const durVal = (o: any) => o.itineraries.reduce((sum: number, it: any) => sum + durMinutes(it.duration), 0)
+
     return [...offers].sort((a, b) => {
-      const p = priceAsc ? price(a) - price(b) : price(b) - price(a)
+      const p = priceAsc ? priceVal(a) - priceVal(b) : priceVal(b) - priceVal(a)
       if (p !== 0) return p
-      return durAsc ? dur(a) - dur(b) : dur(b) - dur(a)
+      return durAsc ? durVal(a) - durVal(b) : durVal(b) - durVal(a)
     })
   }, [offers, priceAsc, durAsc])
 
@@ -53,10 +49,10 @@ export default function ResultsPage() {
 
       <div className="flex items-center space-x-4 mb-4">
         <button onClick={() => setPriceAsc(!priceAsc)} className="border rounded px-3 py-1">
-          Price {priceAsc ? '⬆︎' : '⬇︎'}
+          Price {priceAsc ? '⬆' : '⬇'}
         </button>
         <button onClick={() => setDurAsc(!durAsc)} className="border rounded px-3 py-1">
-          Duration {durAsc ? '⬆︎' : '⬇︎'}
+          Duration {durAsc ? '⬆' : '⬇'}
         </button>
       </div>
 
