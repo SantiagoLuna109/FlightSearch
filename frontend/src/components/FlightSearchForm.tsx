@@ -4,6 +4,7 @@ import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import AirportCombo from './AirportCombo';
+import { useNavigate } from 'react-router-dom';
 
 type Request = {
   originLocationCode: string;
@@ -25,9 +26,15 @@ export default function FlightSearchForm() {
     defaultValues: { currency: 'USD', nonStop: false }
   });
 
+  const navigate = useNavigate();
+
   const search = useMutation({
     mutationFn: (payload: Request) =>
-      axios.post('/api/v1/flights/search', payload).then((r) => r.data)
+      axios.post('/api/v1/flights/search', payload).then((r) => r.data),
+    onSuccess: (response, variables) => {
+      const offersArray = Array.isArray(response) ? response: response.data ?? [];  
+      navigate('/results', { state: { offers: offersArray, search: variables } });
+    }
   });
 
   const date2str = (d: Date) => d.toISOString().slice(0, 10);
@@ -40,7 +47,7 @@ export default function FlightSearchForm() {
       <h2 className="text-2xl font-bold text-center mb-6">Flight Search</h2>
 
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
-        {/* airport pickers */}
+        {/* departure airport or not */}
         <AirportCombo
           label="From"
           value={watch('originLocationCode')}
@@ -49,6 +56,7 @@ export default function FlightSearchForm() {
           }
         />
 
+        {/* arrival airport or salu2*/}
         <AirportCombo
           label="To"
           value={watch('destinationLocationCode')}
@@ -69,7 +77,9 @@ export default function FlightSearchForm() {
             }
             dateFormat="yyyy-MM-dd"
           />
-          {errors.departureDate && <small className="text-red-600">Required</small>}
+          {errors.departureDate && (
+            <small className="text-red-600">Required</small>
+          )}
         </div>
 
         {/* return date */}
@@ -107,17 +117,13 @@ export default function FlightSearchForm() {
           type="submit"
           className="md:col-span-2 bg-blue-600 text-white py-2 rounded
                      hover:bg-blue-700 transition disabled:opacity-60"
-          disabled={search.isPending}>
+          disabled={search.isPending}
+        >
           {search.isPending ? 'Searching…' : 'Search'}
         </button>
       </form>
 
-      {/* result preview */}
-      {search.isSuccess && (
-        <pre className="mt-6 bg-slate-100 p-4 overflow-x-auto rounded max-h-96">
-          {JSON.stringify(search.data, null, 2)}
-        </pre>
-      )}
+      {/* error feedback */}
       {search.isError && (
         <p className="mt-6 text-red-700 font-medium">
           Something went wrong – {String(search.error)}
