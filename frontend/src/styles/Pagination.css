@@ -1,0 +1,23 @@
+.pagination {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  
+  .pagination button {
+    padding: 4px 8px;
+    border: 1px solid #d4d4d4;
+    background: #fff;
+    cursor: pointer;
+  }
+  
+  .pagination button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  
+  .ellipsis {
+    margin: 0 6px;
+  }
