@@ -5,7 +5,7 @@ import FlightCard from '../components/FlightCard'
 
 export default function ResultsPage() {
   const location = useLocation() as {
-    state: { offers: any[]; search: Record<string, unknown> }
+    state: { offers: any[]; search: Record<string, any> }
   }
   const { offers = [], search = {} } = location.state ?? {}
 
@@ -22,10 +22,10 @@ export default function ResultsPage() {
       }, 0)
 
     return [...offers].sort((a, b) => {
-      const pDiff = priceAsc ? priceVal(a) - priceVal(b) : priceVal(b) - priceVal(a)
-      if (pDiff !== 0) return pDiff
-      const dDiff = durAsc ? durVal(a) - durVal(b) : durVal(b) - durVal(a)
-      return dDiff
+      const p = priceAsc ? priceVal(a) - priceVal(b) : priceVal(b) - priceVal(a)
+      if (p !== 0) return p
+      const d = durAsc ? durVal(a) - durVal(b) : durVal(b) - durVal(a)
+      return d
     })
   }, [offers, priceAsc, durAsc])
 
@@ -33,7 +33,9 @@ export default function ResultsPage() {
     return (
       <div className="p-6 text-center">
         <p className="mb-4">No offers returned. Try another search.</p>
-        <Link to="/" className="text-blue-600 underline">Return to search</Link>
+        <Link to="/" className="text-blue-600 underline">
+          Return to search
+        </Link>
       </div>
     )
 
@@ -41,26 +43,27 @@ export default function ResultsPage() {
     <div className="min-h-screen bg-slate-50 p-6 space-y-6 max-w-3xl mx-auto">
       <button
         onClick={() => window.history.back()}
-        className="mb-4 px-3 py-1 border rounded bg-gray-200 hover:bg-gray-300">
+        className="mb-4 px-3 py-1 border rounded bg-gray-200 hover:bg-gray-300"
+      >
         &lt; Return to Search
       </button>
 
       <div className="flex items-center space-x-4 mb-4">
-        <button
-          onClick={() => setPriceAsc(!priceAsc)}
-          className="border rounded px-3 py-1">
+        <button onClick={() => setPriceAsc(!priceAsc)} className="border rounded px-3 py-1">
           Price {priceAsc ? '⬆︎' : '⬇︎'}
         </button>
-
-        <button
-          onClick={() => setDurAsc(!durAsc)}
-          className="border rounded px-3 py-1">
+        <button onClick={() => setDurAsc(!durAsc)} className="border rounded px-3 py-1">
           Duration {durAsc ? '⬆︎' : '⬇︎'}
         </button>
       </div>
 
       {sorted.map(o => (
-        <FlightCard key={o.id} offer={o} currency={search.currency as string} />
+        <FlightCard
+          key={o.id}
+          offer={o}
+          currency={search.currency as string}
+          adults={search.adults as number}
+        />
       ))}
     </div>
   )

@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns'
 
-type Props = { offer: any; currency: string }
+type Props = { offer: any; currency: string; adults: number }
 
 const iso = (t: string) => parseISO(t)
 const dur = (it: any) => it.duration.replace('PT', '').toLowerCase()
@@ -9,14 +9,13 @@ const stops = (it: any) => {
   return n === 0 ? 'Non-stop' : `${n} stop${n > 1 ? 's' : ''}`
 }
 
-export default function FlightCard({ offer, currency }: Props) {
+export default function FlightCard({ offer, currency, adults }: Props) {
   const intl = new Intl.NumberFormat('en-US', { style: 'currency', currency })
   const [outbound, inbound] = offer.itineraries
   const segOut = outbound.segments
   const segBack = inbound?.segments ?? []
-  const adults = offer.travelerPricings?.length ?? 1
-  const per = Number(offer.travelerPricings?.[0]?.price?.total ?? 0)
-  const tot = Number(offer.price.grandTotal)
+  const total = Number(offer.price.grandTotal)
+  const per = total / adults
 
   return (
     <div className="border rounded shadow-sm bg-white overflow-hidden">
@@ -32,7 +31,7 @@ export default function FlightCard({ offer, currency }: Props) {
           <p className="text-sm mt-2">{offer.validatingAirlineCodes[0]}</p>
         </div>
         <div className="col-span-1 flex flex-col items-end justify-center border-l pl-3">
-          <p className="font-bold">{intl.format(tot)}</p>
+          <p className="font-bold">{intl.format(total)}</p>
           <p className="text-sm text-gray-600">total for {adults}</p>
           {adults > 1 && (
             <>
