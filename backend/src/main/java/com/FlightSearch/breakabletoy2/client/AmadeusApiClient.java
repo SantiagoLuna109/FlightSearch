@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -27,6 +28,7 @@ public class AmadeusApiClient {
     private static final String URL_REFERENCE = "/reference-data/locations/";
     private static final String AMADEUS_JSON = "application/vnd.amadeus+json";
     private static final String SHOPPING_URL = "/shopping/flight-offers";
+    private static final String SHOPP_URL = "/shopping/flight-offers/pricing";
     private final RestTemplate restTemplate;
     private final AmadeusAuthService authService;
     private final AmadeusUrlConfig urlConfig;
@@ -201,5 +203,12 @@ public class AmadeusApiClient {
             logger.error("Failed to create auth headers: {}", e.getMessage(), e);
             throw new AmadeusApiException("Failed to authenticate request: " + e.getMessage(), e);
         }
+    }
+    public Map<String,Object> priceOffer(Map<String,Object> offer) {
+        URI uri = URI.create(urlConfig.getBaseUrlV2() + SHOPP_URL);
+        HttpHeaders h = createAuthHeaders();
+        HttpEntity<Map<String,Object>> req =
+                new HttpEntity<>(Map.of("data", List.of(offer)), h);
+        return restTemplate.postForObject(uri, req, Map.class);
     }
 }

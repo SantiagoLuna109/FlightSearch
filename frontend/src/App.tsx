@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import SearchPage from './pages/SearchPage'
 import ResultsPage from './pages/ResultsPage'
+import DetailsPage from './pages/DetailsPage'
 import './App.css'
 
 function App() {
@@ -9,7 +10,7 @@ function App() {
     <Routes>
       <Route path="/" element={<SearchPage />} />
       <Route path="/results" element={<ResultsPage/>}/>
-      {/* New */}
+      <Route path="/details/:id" element={<DetailsPage/>}/>
     </Routes>
   );
 }

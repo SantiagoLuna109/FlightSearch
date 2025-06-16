@@ -57,7 +57,7 @@ export default function ResultsPage() {
       </div>
 
       {slice.map(o => (
-        <FlightCard key={o.id} offer={o} currency={search.currency as string} adults={search.adults as number} />
+        <FlightCard key={o.id} offer={o} currencyCode={search.currencyCode as string} adults={search.adults as number} />
       ))}
 
       <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />

@@ -1,6 +1,7 @@
 import { format, parseISO } from 'date-fns'
+import { useNavigate } from 'react-router-dom'
 
-type Props = { offer: any; currency: string; adults: number }
+type Props = { offer: any; currencyCode: string; adults: number }
 
 const iso = (t: string) => parseISO(t)
 const dur = (it: any) => it.duration.replace('PT', '').toLowerCase()
@@ -9,16 +10,20 @@ const stops = (it: any) => {
   return n === 0 ? 'Non-stop' : `${n} stop${n > 1 ? 's' : ''}`
 }
 
-export default function FlightCard({ offer, currency, adults }: Props) {
-  const intl = new Intl.NumberFormat('en-US', { style: 'currency', currency })
+export default function FlightCard({ offer, currencyCode, adults }: Props) {
+  const intl = new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode })
   const [outbound, inbound] = offer.itineraries
   const segOut = outbound.segments
   const segBack = inbound?.segments ?? []
   const total = Number(offer.price.grandTotal)
   const per = total / adults
+  const navigate = useNavigate()
 
   return (
-    <div className="border rounded shadow-sm bg-white overflow-hidden">
+    <div
+      className="border rounded shadow-sm bg-white overflow-hidden cursor-pointer"
+      onClick={() => navigate(`/details/${offer.id}`, { state: { offer, search: { currencyCode, adults } } })}
+    >
       <div className="grid grid-cols-4 p-4 gap-2">
         <div className="col-span-3 space-y-1">
           <p className="font-semibold">

@@ -1,5 +1,6 @@
 package com.FlightSearch.breakabletoy2.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.FlightSearch.breakabletoy2.dto.FlightFilterRequest;
 
@@ -41,6 +42,7 @@ public class FlightSearchRequest {
     private Integer infants = 0;
 
     @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a valid 3-letter code")
+    @JsonAlias("currency")
     private String currencyCode = "USD";
 
     private String travelClass;

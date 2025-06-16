@@ -1,20 +1,20 @@
-import { useForm } from 'react-hook-form'
-import { useMutation } from '@tanstack/react-query'
-import axios from 'axios'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
-import AirportCombo from './AirportCombo'
-import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form';
+import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import AirportCombo from './AirportCombo';
+import { useNavigate } from 'react-router-dom';
 
 type Request = {
-  originLocationCode: string
-  destinationLocationCode: string
-  departureDate: string
-  returnDate?: string
-  currency: 'USD' | 'MXN' | 'EUR'
-  nonStop: boolean
-  adults: number
-}
+  originLocationCode: string;
+  destinationLocationCode: string;
+  departureDate: string;      
+  returnDate?: string;
+  currencyCode: 'USD' | 'MXN' | 'EUR';
+  nonStop: boolean;
+  adults: number;
+};
 
 export default function FlightSearchForm() {
   const {
@@ -22,25 +22,36 @@ export default function FlightSearchForm() {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors }
+    formState: { errors },
   } = useForm<Request>({
-    defaultValues: { currency: 'USD', nonStop: false, adults: 1 }
-  })
+    defaultValues: { currencyCode: 'USD', nonStop: false, adults: 1 },
+  });
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const date2str = (d: Date) =>
+    d.getFullYear() +
+    '-' +
+    String(d.getMonth() + 1).padStart(2, '0') +
+    '-' +
+    String(d.getDate()).padStart(2, '0');
+
+  const safeDate = (s?: string) =>
+    s && /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(`${s}T00:00:00`) : null;
 
   const search = useMutation({
     mutationFn: (payload: Request) =>
-      axios.post('/api/v1/flights/search', payload).then(r => r.data),
+      axios.post('/api/v1/flights/search', payload).then((r) => r.data),
     onSuccess: (response, variables) => {
-      const offers = Array.isArray(response) ? response : response.data ?? []
-      navigate('/results', { state: { offers, search: variables } })
-    }
-  })
+      const offers = Array.isArray(response) ? response : response.data ?? [];
+      navigate('/results', { state: { offers, search: variables } });
+    },
+  });
 
-  const date2str = (d: Date) => d.toISOString().slice(0, 10)
-  const departure = watch('departureDate')
-  const onSubmit = handleSubmit(d => search.mutate(d))
+  const onSubmit = handleSubmit((data) => search.mutate(data));
+
+  const departure = watch('departureDate');
+  const returnDate = watch('returnDate');
 
   return (
     <div className="max-w-xl w-full bg-white shadow-md rounded-lg p-6">
@@ -50,13 +61,17 @@ export default function FlightSearchForm() {
         <AirportCombo
           label="From"
           value={watch('originLocationCode')}
-          onChange={iata => setValue('originLocationCode', iata ?? '', { shouldValidate: true })}
+          onChange={(iata) =>
+            setValue('originLocationCode', iata ?? '', { shouldValidate: true })
+          }
         />
 
         <AirportCombo
           label="To"
           value={watch('destinationLocationCode')}
-          onChange={iata => setValue('destinationLocationCode', iata ?? '', { shouldValidate: true })}
+          onChange={(iata) =>
+            setValue('destinationLocationCode', iata ?? '', { shouldValidate: true })
+          }
         />
 
         <div className="flex flex-col">
@@ -64,20 +79,26 @@ export default function FlightSearchForm() {
           <DatePicker
             className="border rounded p-2 w-full"
             minDate={new Date()}
-            selected={departure ? new Date(departure) : null}
-            onChange={d => setValue('departureDate', date2str(d as Date), { shouldValidate: true })}
+            selected={safeDate(departure)}
+            onChange={(d) =>
+              setValue('departureDate', date2str(d as Date), { shouldValidate: true })
+            }
             dateFormat="yyyy-MM-dd"
           />
-          {errors.departureDate && <small className="text-red-600">Required</small>}
+          {errors.departureDate && (
+            <small className="text-red-600">Required</small>
+          )}
         </div>
 
         <div className="flex flex-col">
           <label className="font-semibold mb-1">Return date</label>
           <DatePicker
             className="border rounded p-2 w-full"
-            minDate={departure ? new Date(departure) : new Date()}
-            selected={watch('returnDate') ? new Date(watch('returnDate')!) : null}
-            onChange={d => setValue('returnDate', d ? date2str(d as Date) : undefined)}
+            minDate={safeDate(departure) ?? new Date()}
+            selected={safeDate(returnDate)}
+            onChange={(d) =>
+              setValue('returnDate', d ? date2str(d as Date) : undefined)
+            }
             dateFormat="yyyy-MM-dd"
             isClearable
           />
@@ -85,7 +106,7 @@ export default function FlightSearchForm() {
 
         <div className="flex flex-col">
           <label className="font-semibold mb-1">Currency</label>
-          <select {...register('currency')} className="border rounded p-2">
+          <select {...register('currencyCode')} className="border rounded p-2">
             <option>USD</option>
             <option>MXN</option>
             <option>EUR</option>
@@ -100,7 +121,9 @@ export default function FlightSearchForm() {
             {...register('adults', { required: true, min: 1 })}
             className="border rounded p-2"
           />
-          {errors.adults && <small className="text-red-600">Required</small>}
+          {errors.adults && (
+            <small className="text-red-600">Required</small>
+          )}
         </div>
 
         <label className="flex items-center space-x-2 md:col-span-2">
@@ -118,8 +141,10 @@ export default function FlightSearchForm() {
       </form>
 
       {search.isError && (
-        <p className="mt-6 text-red-700 font-medium">Something went wrong – {String(search.error)}</p>
+        <p className="mt-6 text-red-700 font-medium">
+          Something went wrong – {String(search.error)}
+        </p>
       )}
     </div>
-  )
+  );
 }
