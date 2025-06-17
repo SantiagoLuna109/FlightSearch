@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,6 +31,23 @@ public class FlightDetailsResponse {
     private PriceBreakdown priceBreakdown;
     private List<String> validatingAirlineCodes;
     private List<TravelerPricingDetails> travelerPricings;
+
+    @Getter
+    @Setter
+    @Builder
+    public static class AmenityProvider {
+        private String name;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    public static class AmenityDetails {
+        private String description;
+        private boolean isChargeable;
+        private String amenityType;
+        private AmenityProvider amenityProvider;
+    }
 
     @Data
     @Builder
@@ -65,6 +84,7 @@ public class FlightDetailsResponse {
         private LocalDateTime arrivalTime;
         private LocalDateTime departureTime;
     }
+
 
     @Data
     @Builder
@@ -240,7 +260,7 @@ public class FlightDetailsResponse {
         private String weightUnit;
     }
 
-    @Data
+    /*@Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -257,5 +277,5 @@ public class FlightDetailsResponse {
     @AllArgsConstructor
     public static class AmenityProvider {
         private String name;
-    }
+    }*/
 }

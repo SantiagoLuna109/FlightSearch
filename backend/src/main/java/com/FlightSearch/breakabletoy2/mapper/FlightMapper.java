@@ -348,6 +348,19 @@ public class FlightMapper {
                             fareDetail.setIncludedCabinBags(cabinBags);
                         }
 
+                        if (fareData.getAmenities() != null){
+                            List<TravelerPricing.AmenityDetails> ams = fareData.getAmenities().stream().map(ad -> {
+                                TravelerPricing.AmenityProvider p = new TravelerPricing.AmenityProvider();
+                                p.setName(ad.getAmenityProvider().getName());
+                                TravelerPricing.AmenityDetails amd = new TravelerPricing.AmenityDetails();
+                                amd.setDescription(ad.getDescription());
+                                amd.setChargeable(ad.getIsChargeable());
+                                amd.setAmenityType(ad.getAmenityType());
+                                amd.setAmenityProvider(p);
+                                return amd;
+                            }).collect(Collectors.toList());
+                            fareDetail.setAmenities(ams);
+                        }
                         return fareDetail;
                     })
                     .collect(Collectors.toList());

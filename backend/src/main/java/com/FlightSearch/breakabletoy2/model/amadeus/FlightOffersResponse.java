@@ -1,9 +1,13 @@
 package com.FlightSearch.breakabletoy2.model.amadeus;
 
+import com.FlightSearch.breakabletoy2.dto.FlightSearchResponse;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FlightOffersResponse {
@@ -368,6 +372,8 @@ public class FlightOffersResponse {
         public void setFareDetailsBySegment(List<FareDetailsBySegment> fareDetailsBySegment) { this.fareDetailsBySegment = fareDetailsBySegment; }
     }
 
+    @Getter
+    @Setter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FareDetailsBySegment {
         @JsonProperty("segmentId")
@@ -391,25 +397,45 @@ public class FlightOffersResponse {
         @JsonProperty("includedCabinBags")
         private BaggageAllowance includedCabinBags;
 
-        public String getSegmentId() { return segmentId; }
+        @Getter
+        @Setter
+        @JsonProperty("amenities")
+        private List<FlightSearchResponse.AmenityData> amenities;
+
+        @Setter
+        @Getter
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class AmenityProvider {
+            @JsonProperty("name")
+            private String name;
+        }
+
+        @Setter
+        @Getter
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class AmenityData {
+            @JsonProperty("description")
+            private String description;
+            @JsonProperty("isChargeable")
+            private boolean isChargeable;
+            @JsonProperty("amenityType")
+            private String amenityType;
+            @JsonProperty("amenityProvider")
+            private AmenityProvider amenityProvider;
+        }
+
         public void setSegmentId(String segmentId) { this.segmentId = segmentId; }
 
-        public String getCabin() { return cabin; }
         public void setCabin(String cabin) { this.cabin = cabin; }
 
-        public String getFareBasis() { return fareBasis; }
         public void setFareBasis(String fareBasis) { this.fareBasis = fareBasis; }
 
-        public String getBrandedFare() { return brandedFare; }
         public void setBrandedFare(String brandedFare) { this.brandedFare = brandedFare; }
 
-        public String getFareClass() { return fareClass; }
         public void setFareClass(String fareClass) { this.fareClass = fareClass; }
 
-        public BaggageAllowance getIncludedCheckedBags() { return includedCheckedBags; }
         public void setIncludedCheckedBags(BaggageAllowance includedCheckedBags) { this.includedCheckedBags = includedCheckedBags; }
 
-        public BaggageAllowance getIncludedCabinBags() { return includedCabinBags; }
         public void setIncludedCabinBags(BaggageAllowance includedCabinBags) { this.includedCabinBags = includedCabinBags; }
     }
 
