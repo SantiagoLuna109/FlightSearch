@@ -38,15 +38,21 @@ export default function FlightCard({ offer, currencyCode, adults }: Props) {
   return (
     <div
       className="border rounded shadow-sm bg-white overflow-hidden cursor-pointer"
-      onClick={() => nav(`/details/${offer.id}`, { state: { offer, search: { currencyCode, adults } } })}
+      onClick={() =>
+        nav(`/details/${offer.id}`, {
+          state: { offer, search: { currency: currencyCode, currencyCode, adults } }
+        })
+      }
     >
       <div className="grid grid-cols-4 p-4 gap-2">
         <div className="col-span-3 space-y-1">
           <p className="font-semibold">
-            {format(iso(segOut[0].departure.at), 'MMM d, h:mmaaa')} – {format(iso(segOut.at(-1)!.arrival.at), 'MMM d, h:mmaaa')}
+            {format(iso(segOut[0].departure.at), 'MMM d, h:mmaaa')} –{' '}
+            {format(iso(segOut.at(-1)!.arrival.at), 'MMM d, h:mmaaa')}
           </p>
           <p>
-            {segOut[0].departure.airportName} ({segOut[0].departure.iataCode}) → {segOut.at(-1)!.arrival.airportName} ({segOut.at(-1)!.arrival.iataCode})
+            {segOut[0].departure.airportName} ({segOut[0].departure.iataCode}) →{' '}
+            {segOut.at(-1)!.arrival.airportName} ({segOut.at(-1)!.arrival.iataCode})
           </p>
           <p className="text-sm">
             {airlineName} {airlineCode}
@@ -74,10 +80,12 @@ export default function FlightCard({ offer, currencyCode, adults }: Props) {
           <div className="grid grid-cols-4 p-4 gap-2">
             <div className="col-span-3 space-y-1">
               <p className="font-semibold">
-                {format(iso(segBack[0].departure.at), 'MMM d, h:mmaaa')} – {format(iso(segBack.at(-1)!.arrival.at), 'MMM d, h:mmaaa')}
+                {format(iso(segBack[0].departure.at), 'MMM d, h:mmaaa')} –{' '}
+                {format(iso(segBack.at(-1)!.arrival.at), 'MMM d, h:mmaaa')}
               </p>
               <p>
-                {segBack[0].departure.airportName} ({segBack[0].departure.iataCode}) → {segBack.at(-1)!.arrival.airportName} ({segBack.at(-1)!.arrival.iataCode})
+                {segBack[0].departure.airportName} ({segBack[0].departure.iataCode}) →{' '}
+                {segBack.at(-1)!.arrival.airportName} ({segBack.at(-1)!.arrival.iataCode})
               </p>
               <p className="text-sm">{dur(inbound)}</p>
               <p className="text-xs text-gray-600">{layovers(segBack)}</p>
