@@ -8,7 +8,6 @@ type Props = {
     const intl = new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode })
     const base = Number(pricing.price.base)
     const total = Number(pricing.price.grandTotal)
-    //const fees = pricing.price.fees.reduce((s: number, f: any) => s + Number(f.amount), 0)
     const fees = total - base;
     const per = total / adults
   

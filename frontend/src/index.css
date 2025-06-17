@@ -118,3 +118,7 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.checklist{
+  background-color: #3c3c3c;
+}

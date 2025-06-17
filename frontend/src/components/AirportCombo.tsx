@@ -2,6 +2,7 @@ import { Combobox } from '@headlessui/react'
 import { useState } from 'react'
 import { useAirportSearch } from '../hooks/useAirportSearch'
 import type { Airport } from '../hooks/useAirportSearch'
+import '../index.css'
 
 type Props = {
   label: string
@@ -50,7 +51,7 @@ export default function AirportCombo({ label, value, onChange }: Props) {
                 key={`${air.code}-${air.name}`}
                 value={air}
                 className={({ active }) =>
-                  `cursor-pointer select-none p-2 ${active ? 'bg-blue-100' : ''}`
+                  `cursor-pointer select-none p-2 ${active ? 'bg-blue-100 checklist' : ''}`
                 }
               >
                 {formatLabel(air)}{' '}
