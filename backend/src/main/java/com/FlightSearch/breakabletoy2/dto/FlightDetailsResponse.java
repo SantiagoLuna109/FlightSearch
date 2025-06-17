@@ -260,22 +260,4 @@ public class FlightDetailsResponse {
         private String weightUnit;
     }
 
-    /*@Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class AmenityDetails {
-        private String description;
-        private boolean isChargeable;
-        private String amenityType;
-        private AmenityProvider amenityProvider;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class AmenityProvider {
-        private String name;
-    }*/
 }
