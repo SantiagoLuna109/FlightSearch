@@ -91,6 +91,7 @@ public class AmadeusApiClient {
         }
     }
 
+
     public FlightOffersResponse searchFlights(Map<String, String> params) {
         try {
             logger.info("Searching flights with parameters: {}", params);
@@ -99,6 +100,7 @@ public class AmadeusApiClient {
                     .fromHttpUrl(urlConfig.getBaseUrlV2() + SHOPPING_URL);
 
             params.forEach(builder::queryParam);
+            //builder.queryParam("include", "locations");
 
             URI uri = builder.build().toUri();
             logger.debug("Flight search URL: {}", uri);
@@ -135,6 +137,27 @@ public class AmadeusApiClient {
             logger.error("Unexpected error searching flights: {}", e.getMessage(), e);
             throw new AmadeusApiException("Unexpected error searching flights: " + e.getMessage(), e);
         }
+    }
+
+    private HttpHeaders createAuthHeaders() {
+        try {
+            String token = authService.getAccessToken();
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + token);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Accept", AMADEUS_JSON);
+            return headers;
+        } catch (Exception e) {
+            logger.error("Failed to create auth headers: {}", e.getMessage(), e);
+            throw new AmadeusApiException("Failed to authenticate request: " + e.getMessage(), e);
+        }
+    }
+
+    public Map<String,Object> priceOffer(Map<String,Object> offer) {
+        URI uri = URI.create(urlConfig.getBaseUrlV2() + SHOPP_URL);
+        HttpHeaders h = createAuthHeaders();
+        HttpEntity<Map<String,Object>> req = new HttpEntity<>(Map.of("data", List.of(offer)), h);
+        return restTemplate.postForObject(uri, req, Map.class);
     }
 
     public LocationResponse getLocationById(String locationId) {
@@ -187,28 +210,5 @@ public class AmadeusApiClient {
 
     public LocationResponse searchAirportsAndCities(String keyword, int limit) {
         return searchLocations(keyword, "AIRPORT,CITY", limit);
-    }
-
-    private HttpHeaders createAuthHeaders() {
-        try {
-            String token = authService.getAccessToken();
-
-            final HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + token);
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Accept", AMADEUS_JSON);
-
-            return headers;
-        } catch (Exception e) {
-            logger.error("Failed to create auth headers: {}", e.getMessage(), e);
-            throw new AmadeusApiException("Failed to authenticate request: " + e.getMessage(), e);
-        }
-    }
-    public Map<String,Object> priceOffer(Map<String,Object> offer) {
-        URI uri = URI.create(urlConfig.getBaseUrlV2() + SHOPP_URL);
-        HttpHeaders h = createAuthHeaders();
-        HttpEntity<Map<String,Object>> req =
-                new HttpEntity<>(Map.of("data", List.of(offer)), h);
-        return restTemplate.postForObject(uri, req, Map.class);
     }
 }

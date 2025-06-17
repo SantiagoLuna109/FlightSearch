@@ -29,49 +29,49 @@ public class FlightSearchService {
     private final FlightMapper flightMapper;
     private final FlightFilterService flightFilterService;
     private final CurrencyConversionService currencyConversionService;
+    private final IataCache iataCache;
 
     public FlightSearchService(AmadeusApiClient amadeusApiClient, FlightMapper flightMapper,
-                               FlightFilterService flightFilterService, CurrencyConversionService currencyConversionService) {
+                               FlightFilterService flightFilterService, CurrencyConversionService currencyConversionService, IataCache iataCache) {
         this.amadeusApiClient = amadeusApiClient;
         this.flightMapper = flightMapper;
         this.flightFilterService = flightFilterService;
         this.currencyConversionService = currencyConversionService;
+        this.iataCache = iataCache;
     }
 
     public List<Flight> searchFlights(FlightSearchRequest request) {
         validateSearchRequest(request);
-
         try {
             logger.info("Searching flights for request: {}", request);
-
             Map<String, String> params = buildAmadeusApiParams(request);
             FlightOffersResponse response = amadeusApiClient.searchFlights(params);
-
-            if (response == null || response.getData() == null || response.getData().isEmpty()) {
-                logger.warn("No flights found for request: {}", request);
-                return Collections.emptyList();
-            }
-
+            if (response == null || response.getData() == null || response.getData().isEmpty()) return Collections.emptyList();
             List<Flight> flights = response.getData().stream()
-                    .map(data -> flightMapper.mapToFlight(data, response.getDictionaries()))
+                    .map(d -> flightMapper.mapToFlight(d, response.getDictionaries()))
                     .collect(Collectors.toList());
-
+            flights.forEach(this::enrichFlight);
             flights = flightFilterService.applyFilters(flights, request);
-
-            if (request.getCurrencyCode() != null && !request.getCurrencyCode().isEmpty()) {
-                flights = applyCurrencyConversion(flights, request.getCurrencyCode());
-            }
-
-            logger.info("Found {} flights after filtering for request: {}", flights.size(), request);
+            if (request.getCurrencyCode() != null && !request.getCurrencyCode().isEmpty()) flights = applyCurrencyConversion(flights, request.getCurrencyCode());
             return flights;
+        } catch (AmadeusApiException e) { throw e; } catch (Exception e) { throw new AmadeusApiException("Unexpected error during flight search: " + e.getMessage(), e); }
+    }
 
-        } catch (AmadeusApiException e) {
-            logger.error("Amadeus API error during flight search: {}", e.getMessage(), e);
-            throw e;
-        } catch (Exception e) {
-            logger.error("Unexpected error during flight search: {}", e.getMessage(), e);
-            throw new AmadeusApiException("Unexpected error during flight search: " + e.getMessage(), e);
-        }
+    private void enrichFlight(Flight f) {
+        if (f.getItineraries() == null) return;
+        f.getItineraries().forEach(it -> {
+            if (it.getSegments() == null) return;
+            it.getSegments().forEach(s -> {
+                if (s.getDeparture() != null) {
+                    if (s.getDeparture().getAirportName() == null) s.getDeparture().setAirportName(iataCache.airportName(s.getDeparture().getIataCode()));
+                    if (s.getDeparture().getCityName() == null) s.getDeparture().setCityName(iataCache.cityName(s.getDeparture().getIataCode()));
+                }
+                if (s.getArrival() != null) {
+                    if (s.getArrival().getAirportName() == null) s.getArrival().setAirportName(iataCache.airportName(s.getArrival().getIataCode()));
+                    if (s.getArrival().getCityName() == null) s.getArrival().setCityName(iataCache.cityName(s.getArrival().getIataCode()));
+                }
+            });
+        });
     }
 
     private List<Flight> applyCurrencyConversion(List<Flight> flights, String targetCurrency) {
