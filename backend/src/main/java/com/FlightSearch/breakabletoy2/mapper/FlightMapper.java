@@ -1,7 +1,9 @@
 package com.FlightSearch.breakabletoy2.mapper;
 
+import com.FlightSearch.breakabletoy2.client.AmadeusApiClient;
 import com.FlightSearch.breakabletoy2.dto.FlightSearchResponse;
 import com.FlightSearch.breakabletoy2.model.*;
+import com.FlightSearch.breakabletoy2.service.IataCache;
 import org.springframework.stereotype.Component;
 import com.FlightSearch.breakabletoy2.model.amadeus.FlightOffersResponse;
 import java.time.LocalDateTime;
@@ -10,9 +12,18 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class FlightMapper {
+
+    private final AmadeusApiClient amadeusApiClient;
+    private final IataCache iataCache;
+
+    public FlightMapper(AmadeusApiClient amadeusApiClient, IataCache iataCache){
+        this.amadeusApiClient = amadeusApiClient;
+        this.iataCache = iataCache;
+    }
 
     private static final DateTimeFormatter[] DATE_FORMATTERS = {
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
@@ -20,22 +31,6 @@ public class FlightMapper {
             DateTimeFormatter.ISO_LOCAL_DATE_TIME,
             DateTimeFormatter.ISO_LOCAL_DATE
     };
-
-    public List<Flight> toFlightList(FlightSearchResponse response) {
-        if (response == null || response.getData() == null) {
-            return List.of();
-        }
-
-        FlightSearchResponse.Dictionaries dictionaries = response.getDictionaries();
-
-        return response.getData().stream()
-                .map(flightData -> mapToFlightFromSearchResponse(flightData, dictionaries))
-                .collect(Collectors.toList());
-    }
-
-    public List<Flight> mapToFlights(FlightSearchResponse response) {
-        return toFlightList(response);
-    }
 
     public Flight mapToFlight(FlightOffersResponse.FlightOfferData flightOfferData, FlightOffersResponse.Dictionaries dictionaries) {
         Flight flight = new Flight();
@@ -71,6 +66,24 @@ public class FlightMapper {
 
         return flight;
     }
+
+    public List<Flight> toFlightList(FlightSearchResponse response) {
+        if (response == null || response.getData() == null) {
+            return List.of();
+        }
+
+        FlightSearchResponse.Dictionaries dictionaries = response.getDictionaries();
+
+        return response.getData().stream()
+                .map(flightData -> mapToFlightFromSearchResponse(flightData, dictionaries))
+                .collect(Collectors.toList());
+    }
+
+    public List<Flight> mapToFlights(FlightSearchResponse response) {
+        return toFlightList(response);
+    }
+
+
 
     private Flight mapToFlightFromSearchResponse(FlightSearchResponse.FlightOfferData flightOfferData, FlightSearchResponse.Dictionaries dictionaries) {
         Flight flight = new Flight();
@@ -202,6 +215,14 @@ public class FlightMapper {
             operating.setCarrierCode(segmentData.getOperating().getCarrierCode());
             operating.setCarrierName(getCarrierNameFromAmadeus(segmentData.getOperating().getCarrierCode(), dictionaries));
             segment.setOperating(operating);
+            segment.setOperatingCarrierCode(operating.getCarrierCode());
+            segment.setOperatingCarrierName(operating.getCarrierName());
+        }
+
+        if(segmentData.getOperating() != null && segmentData.getOperating().getCarrierCode() != null){
+            String opCode = segmentData.getOperating().getCarrierCode();
+            segment.setOperatingCarrierCode(opCode);
+            segment.setOperatingCarrierName(getCarrierNameFromAmadeus(opCode,dictionaries));
         }
 
         return segment;
@@ -209,12 +230,15 @@ public class FlightMapper {
 
     private FlightEndpoint mapToFlightEndpointFromSearchResponse(FlightSearchResponse.FlightEndpointData endpointData, FlightSearchResponse.Dictionaries dictionaries) {
         FlightEndpoint endpoint = new FlightEndpoint();
+        String code = endpoint.getIataCode();
         endpoint.setIataCode(endpointData.getIataCode());
         endpoint.setTerminal(endpointData.getTerminal());
         endpoint.setAt(parseDateTime(endpointData.getAt()));
+        endpoint.setIataCode(code);
+        endpoint.setAirportName(iataCache.airportName(code));
 
         LocationInfo locationInfo = getLocationInfoFromSearchResponse(endpointData.getIataCode(), dictionaries);
-        endpoint.setAirportName(locationInfo.getAirportName());
+        //endpoint.setAirportName(locationInfo.getAirportName());
         endpoint.setCityName(locationInfo.getCityName());
         endpoint.setCountryCode(locationInfo.getCountryCode());
 
@@ -223,14 +247,17 @@ public class FlightMapper {
 
     private FlightEndpoint mapToFlightEndpointFromAmadeus(FlightOffersResponse.FlightEndpoint endpointData, FlightOffersResponse.Dictionaries dictionaries) {
         FlightEndpoint endpoint = new FlightEndpoint();
-        endpoint.setIataCode(endpointData.getIataCode());
+        String code = endpointData.getIataCode();
+        endpoint.setIataCode(code);
+        //endpoint.setIataCode(endpointData.getIataCode());
         endpoint.setTerminal(endpointData.getTerminal());
         endpoint.setAt(parseDateTime(endpointData.getAt()));
 
         LocationInfo locationInfo = getLocationInfoFromAmadeus(endpointData.getIataCode(), dictionaries);
-        endpoint.setAirportName(locationInfo.getAirportName());
+        //endpoint.setAirportName(locationInfo.getAirportName());
         endpoint.setCityName(locationInfo.getCityName());
         endpoint.setCountryCode(locationInfo.getCountryCode());
+        endpoint.setAirportName(iataCache.airportName(code));
 
         return endpoint;
     }
@@ -330,6 +357,19 @@ public class FlightMapper {
                             fareDetail.setIncludedCabinBags(cabinBags);
                         }
 
+                        if (fareData.getAmenities() != null){
+                            List<TravelerPricing.AmenityDetails> ams = fareData.getAmenities().stream().map(ad -> {
+                                TravelerPricing.AmenityProvider p = new TravelerPricing.AmenityProvider();
+                                p.setName(ad.getAmenityProvider().getName());
+                                TravelerPricing.AmenityDetails amd = new TravelerPricing.AmenityDetails();
+                                amd.setDescription(ad.getDescription());
+                                amd.setChargeable(ad.getIsChargeable());
+                                amd.setAmenityType(ad.getAmenityType());
+                                amd.setAmenityProvider(p);
+                                return amd;
+                            }).collect(Collectors.toList());
+                            fareDetail.setAmenities(ams);
+                        }
                         return fareDetail;
                     })
                     .collect(Collectors.toList());
@@ -417,7 +457,8 @@ public class FlightMapper {
         if (location != null) {
             info.setCityName(location.getCityCode());
             info.setCountryCode(location.getCountryCode());
-            info.setAirportName(iataCode);
+            info.setAirportName(iataCache.airportName(iataCode));
+
         }
 
         return info;
@@ -455,7 +496,7 @@ public class FlightMapper {
         if (location != null) {
             info.setCityName(location.getCityCode());
             info.setCountryCode(location.getCountryCode());
-            info.setAirportName(iataCode);
+            info.setAirportName(iataCache.airportName(iataCode));
         }
 
         return info;

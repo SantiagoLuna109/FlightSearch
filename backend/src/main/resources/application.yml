@@ -28,5 +28,6 @@ amadeus:
 
 logging:
   level:
+    root: INFO
     com.FlightSearch.breakabletoy2: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG

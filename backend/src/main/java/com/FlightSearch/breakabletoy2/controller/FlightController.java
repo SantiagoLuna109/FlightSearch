@@ -1,5 +1,6 @@
 package com.FlightSearch.breakabletoy2.controller;
 
+import com.FlightSearch.breakabletoy2.client.AmadeusApiClient;
 import com.FlightSearch.breakabletoy2.dto.FlightSearchRequest;
 import com.FlightSearch.breakabletoy2.exception.AmadeusApiException;
 import com.FlightSearch.breakabletoy2.model.Flight;
@@ -36,6 +37,7 @@ public class FlightController {
     private final FlightSearchService flightSearchService;
     private final FlightFilterService flightFilterService;
     private final CurrencyConversionService currencyConversionService;
+    private AmadeusApiClient amadeusApiClient;
 
     public FlightController(FlightSearchService flightSearchService,
                             FlightFilterService flightFilterService,
@@ -84,6 +86,20 @@ public class FlightController {
                             "message", "An unexpected error occurred",
                             "code", "INTERNAL_ERROR"
                     ));
+        }
+    }
+
+    @PostMapping("/price")
+    public ResponseEntity<?> price(
+            @RequestBody Map<String,Object> offer) {
+        try {
+            Map<String,Object> priced = amadeusApiClient.priceOffer(offer);
+            return ResponseEntity.ok(priced);
+        } catch (AmadeusApiException ex) {
+            logger.error("Pricing failed", ex);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(Map.of("error","AMADEUS_API_ERROR",
+                            "message", ex.getMessage()));
         }
     }
 

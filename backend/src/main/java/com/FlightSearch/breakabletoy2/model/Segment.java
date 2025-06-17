@@ -1,6 +1,10 @@
 package com.FlightSearch.breakabletoy2.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Segment {
@@ -16,6 +20,20 @@ public class Segment {
     private Integer numberOfStops;
     private Boolean blacklistedInEU;
     private String carrierName;
+    private String operatingCarrierName;
+    private String operatingCarrierCode;
+    private List<FareDetailsBySegment> fareDetailsBySegmentList;
+
+    public List<FareDetailsBySegment> getFareDetailsBySegmentList() { return fareDetailsBySegmentList; }
+    public void setFareDetailsBySegmentList(List<FareDetailsBySegment> fareDetailsBySegmentList) {this.fareDetailsBySegmentList = fareDetailsBySegmentList;}
+
+    public String getOperatingCarrierCode() { return operatingCarrierCode; }
+
+    public void setOperatingCarrierCode(String operatingCarrierCode) { this.operatingCarrierCode = operatingCarrierCode; }
+
+    public String getOperatingCarrierName() { return operatingCarrierName; }
+
+    public void setOperatingCarrierName(String operatingCarrierName){ this.operatingCarrierName = operatingCarrierName; }
 
     public String getCarrierName(){ return carrierName; }
 
