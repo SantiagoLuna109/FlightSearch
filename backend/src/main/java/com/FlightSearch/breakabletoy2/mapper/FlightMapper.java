@@ -212,6 +212,8 @@ public class FlightMapper {
             operating.setCarrierCode(segmentData.getOperating().getCarrierCode());
             operating.setCarrierName(getCarrierNameFromAmadeus(segmentData.getOperating().getCarrierCode(), dictionaries));
             segment.setOperating(operating);
+            segment.setOperatingCarrierCode(operating.getCarrierCode());
+            segment.setOperatingCarrierName(operating.getCarrierName());
         }
 
         if(segmentData.getOperating() != null && segmentData.getOperating().getCarrierCode() != null){
