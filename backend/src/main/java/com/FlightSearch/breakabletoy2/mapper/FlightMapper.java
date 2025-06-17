@@ -3,6 +3,7 @@ package com.FlightSearch.breakabletoy2.mapper;
 import com.FlightSearch.breakabletoy2.client.AmadeusApiClient;
 import com.FlightSearch.breakabletoy2.dto.FlightSearchResponse;
 import com.FlightSearch.breakabletoy2.model.*;
+import com.FlightSearch.breakabletoy2.service.IataCache;
 import org.springframework.stereotype.Component;
 import com.FlightSearch.breakabletoy2.model.amadeus.FlightOffersResponse;
 import java.time.LocalDateTime;
@@ -17,9 +18,11 @@ import java.util.stream.Stream;
 public class FlightMapper {
 
     private final AmadeusApiClient amadeusApiClient;
+    private final IataCache iataCache;
 
-    public FlightMapper(AmadeusApiClient amadeusApiClient){
+    public FlightMapper(AmadeusApiClient amadeusApiClient, IataCache iataCache){
         this.amadeusApiClient = amadeusApiClient;
+        this.iataCache = iataCache;
     }
 
     private static final DateTimeFormatter[] DATE_FORMATTERS = {
@@ -227,12 +230,15 @@ public class FlightMapper {
 
     private FlightEndpoint mapToFlightEndpointFromSearchResponse(FlightSearchResponse.FlightEndpointData endpointData, FlightSearchResponse.Dictionaries dictionaries) {
         FlightEndpoint endpoint = new FlightEndpoint();
+        String code = endpoint.getIataCode();
         endpoint.setIataCode(endpointData.getIataCode());
         endpoint.setTerminal(endpointData.getTerminal());
         endpoint.setAt(parseDateTime(endpointData.getAt()));
+        endpoint.setIataCode(code);
+        endpoint.setAirportName(iataCache.airportName(code));
 
         LocationInfo locationInfo = getLocationInfoFromSearchResponse(endpointData.getIataCode(), dictionaries);
-        endpoint.setAirportName(locationInfo.getAirportName());
+        //endpoint.setAirportName(locationInfo.getAirportName());
         endpoint.setCityName(locationInfo.getCityName());
         endpoint.setCountryCode(locationInfo.getCountryCode());
 
@@ -241,14 +247,17 @@ public class FlightMapper {
 
     private FlightEndpoint mapToFlightEndpointFromAmadeus(FlightOffersResponse.FlightEndpoint endpointData, FlightOffersResponse.Dictionaries dictionaries) {
         FlightEndpoint endpoint = new FlightEndpoint();
-        endpoint.setIataCode(endpointData.getIataCode());
+        String code = endpointData.getIataCode();
+        endpoint.setIataCode(code);
+        //endpoint.setIataCode(endpointData.getIataCode());
         endpoint.setTerminal(endpointData.getTerminal());
         endpoint.setAt(parseDateTime(endpointData.getAt()));
 
         LocationInfo locationInfo = getLocationInfoFromAmadeus(endpointData.getIataCode(), dictionaries);
-        endpoint.setAirportName(locationInfo.getAirportName());
+        //endpoint.setAirportName(locationInfo.getAirportName());
         endpoint.setCityName(locationInfo.getCityName());
         endpoint.setCountryCode(locationInfo.getCountryCode());
+        endpoint.setAirportName(iataCache.airportName(code));
 
         return endpoint;
     }
@@ -448,7 +457,8 @@ public class FlightMapper {
         if (location != null) {
             info.setCityName(location.getCityCode());
             info.setCountryCode(location.getCountryCode());
-            info.setAirportName(iataCode);
+            info.setAirportName(iataCache.airportName(iataCode));
+
         }
 
         return info;
@@ -486,7 +496,7 @@ public class FlightMapper {
         if (location != null) {
             info.setCityName(location.getCityCode());
             info.setCountryCode(location.getCountryCode());
-            info.setAirportName(iataCode);
+            info.setAirportName(iataCache.airportName(iataCode));
         }
 
         return info;
