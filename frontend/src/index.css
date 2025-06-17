@@ -1,6 +1,40 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-white text-gray-900;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    html {
+      @apply bg-gray-900 text-gray-100;
+    }
+  }
+}
+.checkPagination{
+  background-color: rgba(59,59,59,255);
+}
+
+.pagination-button{
+  background-color: rgba(26,26,26,255);
+}
+
+.checkbutton{
+  background-color: rgba(36,36,36,255);
+  color: white;
+}
+
+.checkSearch{
+  background-color: rgba(36,36,36,255);
+}
+
+.checkSearchForm{
+  background-color: rgba(59,59,59,255);
+  border-radius: 8px;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -18,11 +52,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: rgba(26,26,26,255);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: rgba(26,26,26,255);
 }
 
 body {
@@ -42,6 +76,17 @@ div {
   background-color: #242424;
 }
 
+.checkButtonDetails{
+  width: 12%;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  color: #f9f9f9;
+}
+.checkButtonDetails:hover {
+  border-color: rgba(26,26,26,255);
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -54,7 +99,7 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: rgba(26,26,26,255);
 }
 button:focus,
 button:focus-visible {
@@ -67,7 +112,7 @@ button:focus-visible {
     background-color: #ffffff;
   }
   a:hover {
-    color: #747bff;
+    color: rgba(26,26,26,255);
   }
   button {
     background-color: #f9f9f9;

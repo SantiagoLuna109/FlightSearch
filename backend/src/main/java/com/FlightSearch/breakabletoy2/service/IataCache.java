@@ -1,3 +1,4 @@
+
 package com.FlightSearch.breakabletoy2.service;
 
 import com.FlightSearch.breakabletoy2.client.AmadeusApiClient;

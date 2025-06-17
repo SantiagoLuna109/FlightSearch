@@ -9,7 +9,7 @@
   .pagination button {
     padding: 4px 8px;
     border: 1px solid #d4d4d4;
-    background: #fff;
+    background: rgba(26,26,26,255);
     cursor: pointer;
   }
   

@@ -25,7 +25,7 @@ export default function AirportCombo({ label, value, onChange }: Props) {
 
   return (
     <Combobox value={selected} onChange={handleSelect} nullable>
-      <div className="flex flex-col">
+      <div className="flex flex-col checkSearchForm">
         <Combobox.Label className="font-semibold mb-1">{label}</Combobox.Label>
 
         <div className="relative">

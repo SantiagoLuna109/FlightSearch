@@ -1,5 +1,6 @@
 import React from 'react'
 import '../styles/Pagination.css'
+import '../index.css'
 
 interface Props {
   currentPage: number
@@ -25,7 +26,7 @@ const Pagination: React.FC<Props> = ({ currentPage, totalPages, onPageChange }) 
   }
 
   return (
-    <div className="pagination">
+    <div className="pagination checkPagination">
       <button disabled={currentPage === 0} onClick={() => change(0)}>&lt;&lt;</button>
       <button disabled={currentPage === 0} onClick={() => change(currentPage - 1)}>&lt;</button>
       {pages().map((p, i) =>

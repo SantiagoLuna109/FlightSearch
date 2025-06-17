@@ -17,8 +17,8 @@ export default function DetailsPage() {
     <div className="p-6">
       <button
       onClick={() => navigate(-1)}
-      className="mb-6 inline-flex items-center text-sm text-blue-600 hover:underline"
-      >  
+      className="mb-6 inline-flex items-center text-sm text-blue-600 hover:underline checkButtonDetails"
+      >Return 
       </button>
       <div className="md:col-span-2 space-y-6">
         {offer.itineraries.map((it: any, idx: number) =>

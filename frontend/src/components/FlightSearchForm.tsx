@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+/*import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
@@ -54,10 +54,10 @@ export default function FlightSearchForm() {
   const returnDate = watch('returnDate');
 
   return (
-    <div className="max-w-xl w-full bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-2xl font-bold text-center mb-6">Flight Search</h2>
+    <div className="max-w-xl w-full bg-white shadow-md rounded-lg p-6 checkSearchForm">
+      <h2 className="text-2xl font-bold text-center mb-6 checkSearchForm">Flight Search</h2>
 
-      <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
+      <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2 checkSearchForm" >
         <AirportCombo
           label="From"
           value={watch('originLocationCode')}
@@ -74,7 +74,7 @@ export default function FlightSearchForm() {
           }
         />
 
-        <div className="flex flex-col">
+        <div className="flex flex-col checkSearchForm checkSearchForm">
           <label className="font-semibold mb-1">Departure date</label>
           <DatePicker
             className="border rounded p-2 w-full"
@@ -90,7 +90,7 @@ export default function FlightSearchForm() {
           )}
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col checkSearchForm">
           <label className="font-semibold mb-1">Return date</label>
           <DatePicker
             className="border rounded p-2 w-full"
@@ -104,7 +104,7 @@ export default function FlightSearchForm() {
           />
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col checkSearchForm">
           <label className="font-semibold mb-1">Currency</label>
           <select {...register('currencyCode')} className="border rounded p-2">
             <option>USD</option>
@@ -113,7 +113,7 @@ export default function FlightSearchForm() {
           </select>
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col checkSearchForm">
           <label className="font-semibold mb-1">Adults</label>
           <input
             type="number"
@@ -123,6 +123,201 @@ export default function FlightSearchForm() {
           />
           {errors.adults && (
             <small className="text-red-600">Required</small>
+          )}
+        </div>
+
+        <label className="flex items-center space-x-2 md:col-span-2 checkSearchForm">
+          <input type="checkbox" {...register('nonStop')} />
+          <span className="font-semibold">Non-stop only</span>
+        </label>
+
+        <button
+          type="submit"
+          className="md:col-span-2 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-60 checkSearchForm"
+          disabled={search.isPending}
+        >
+          {search.isPending ? 'Searching…' : 'Search'}
+        </button>
+      </form>
+
+      {search.isError && (
+        <p className="mt-6 text-red-700 font-medium checkSearchForm">
+          Something went wrong – {String(search.error)}
+        </p>
+      )}
+    </div>
+  );
+}
+*/
+import { useForm, Controller } from 'react-hook-form';
+import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import AirportCombo from './AirportCombo';
+import { useNavigate } from 'react-router-dom';
+
+type Request = {
+  originLocationCode: string;
+  destinationLocationCode: string;
+  departureDate: string;      
+  returnDate?: string;
+  currencyCode: 'USD' | 'MXN' | 'EUR';
+  nonStop: boolean;
+  adults: number;
+};
+
+export default function FlightSearchForm() {
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Request>({
+    defaultValues: {
+      originLocationCode: '',
+      destinationLocationCode: '',
+      departureDate: '',
+      returnDate: undefined,
+      currencyCode: 'USD',
+      nonStop: false,
+      adults: 1,
+    },
+  });
+
+  const navigate = useNavigate();
+
+  const date2str = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+      d.getDate()
+    ).padStart(2, '0')}`;
+
+  const search = useMutation({
+    mutationFn: (payload: Request) =>
+      axios.post('/api/v1/flights/search', payload).then((r) => r.data),
+    onSuccess: (response, variables) => {
+      const offers = Array.isArray(response) ? response : response.data ?? [];
+      navigate('/results', { state: { offers, search: variables } });
+    },
+  });
+
+  const onSubmit = handleSubmit((data) => search.mutate(data));
+
+  return (
+    <div className="max-w-xl w-full bg-white shadow-md rounded-lg p-6 checkSearchForm">
+      <h2 className="text-2xl font-bold text-center mb-6">Flight Search</h2>
+
+      <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2 checkSearchForm">
+        <Controller
+          name="originLocationCode"
+          control={control}
+          rules={{ required: 'Origin is required' }}
+          render={({ field }) => (
+            <div className="flex flex-col checkSearchForm">
+              <AirportCombo
+                label="From"
+                value={field.value}
+                onChange={(iata) => field.onChange(iata ?? '')}
+              />
+              {errors.originLocationCode && (
+                <small className="text-red-600">
+                  {errors.originLocationCode.message}
+                </small>
+              )}
+            </div>
+          )}
+        />
+
+        <Controller
+          name="destinationLocationCode"
+          control={control}
+          rules={{ required: 'Destination is required' }}
+          render={({ field }) => (
+            <div className="flex flex-col checkSearchForm">
+              <AirportCombo
+                label="To"
+                value={field.value}
+                onChange={(iata) => field.onChange(iata ?? '')}
+              />
+              {errors.destinationLocationCode && (
+                <small className="text-red-600">
+                  {errors.destinationLocationCode.message}
+                </small>
+              )}
+            </div>
+          )}
+        />
+
+        <Controller
+          name="departureDate"
+          control={control}
+          rules={{ required: 'Departure date is required' }}
+          render={({ field }) => (
+            <div className="flex flex-col checkSearchForm">
+              <label className="font-semibold mb-1">Departure date</label>
+              <DatePicker
+                className="border rounded p-2 w-full"
+                minDate={new Date()}
+                selected={field.value ? new Date(field.value) : null}
+                onChange={(d) => field.onChange(date2str(d as Date))}
+                dateFormat="yyyy-MM-dd"
+              />
+              {errors.departureDate && (
+                <small className="text-red-600">
+                  {errors.departureDate.message}
+                </small>
+              )}
+            </div>
+          )}
+        />
+
+        {/* Salu2 */}
+        <Controller
+          name="returnDate"
+          control={control}
+          render={({ field }) => (
+            <div className="flex flex-col checkSearchForm">
+              <label className="font-semibold mb-1">Return date</label>
+              <DatePicker
+                className="border rounded p-2 w-full"
+                minDate={
+                  field.value
+                    ? new Date(field.value)
+                    : new Date(field.value || '')
+                }
+                selected={field.value ? new Date(field.value) : null}
+                onChange={(d) =>
+                  field.onChange(d ? date2str(d as Date) : undefined)
+                }
+                dateFormat="yyyy-MM-dd"
+                isClearable
+              />
+            </div>
+          )}
+        />
+
+        <div className="flex flex-col checkSearchForm">
+          <label className="font-semibold mb-1">Currency</label>
+          <select
+            {...register('currencyCode')}
+            className="border rounded p-2"
+          >
+            <option>USD</option>
+            <option>MXN</option>
+            <option>EUR</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col checkSearchForm">
+          <label className="font-semibold mb-1">Adults</label>
+          <input
+            type="number"
+            min={1}
+            {...register('adults', { required: true, min: 1 })}
+            className="border rounded p-2"
+          />
+          {errors.adults && (
+            <small className="text-red-600">At least one adult</small>
           )}
         </div>
 

@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useState, useMemo } from 'react'
 import FlightCard from '../components/FlightCard'
 import Pagination from '../components/Pagination'
+import '../styles/Pagination.css'
 
 const PAGE_SIZE = 10
 
@@ -42,12 +43,12 @@ export default function ResultsPage() {
     )
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 space-y-6 max-w-3xl mx-auto">
-      <button onClick={() => window.history.back()} className="mb-4 px-3 py-1 border rounded bg-gray-200 hover:bg-gray-300">
+    <div className="min-h-screen bg-slate-50 p-6 space-y-6 max-w-3xl mx-auto checkSearchForm ">
+      <button onClick={() => window.history.back()} className="mb-4 px-3 py-1 border rounded bg-gray-200 hover:bg-gray-300 pagination pagination-button">
         &lt; Return to Search
       </button>
 
-      <div className="flex items-center space-x-4 mb-4">
+      <div className="flex items-center space-x-4 mb-4 checkSearchForm">
         <button onClick={() => setPriceAsc(!priceAsc)} className="border rounded px-3 py-1">
           Price {priceAsc ? '⬆' : '⬇'}
         </button>
