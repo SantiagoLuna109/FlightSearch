@@ -16,6 +16,16 @@ public class Segment {
     private Integer numberOfStops;
     private Boolean blacklistedInEU;
     private String carrierName;
+    private String operatingCarrierName;
+    private String operatingCarrierCode;
+
+    public String getOperatingCarrierCode() { return operatingCarrierCode; }
+
+    public void setOperatingCarrierCode(String operatingCarrierCode) { this.operatingCarrierCode = operatingCarrierCode; }
+
+    public String getOperatingCarrierName() { return operatingCarrierName; }
+
+    public void setOperatingCarrierName(String operatingCarrierName){ this.operatingCarrierName = operatingCarrierName; }
 
     public String getCarrierName(){ return carrierName; }
 
