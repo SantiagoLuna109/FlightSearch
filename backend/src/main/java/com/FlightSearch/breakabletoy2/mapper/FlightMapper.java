@@ -3,6 +3,7 @@ package com.FlightSearch.breakabletoy2.mapper;
 import com.FlightSearch.breakabletoy2.client.AmadeusApiClient;
 import com.FlightSearch.breakabletoy2.dto.FlightSearchResponse;
 import com.FlightSearch.breakabletoy2.model.*;
+import com.FlightSearch.breakabletoy2.service.DictionaryService;
 import com.FlightSearch.breakabletoy2.service.IataCache;
 import org.springframework.stereotype.Component;
 import com.FlightSearch.breakabletoy2.model.amadeus.FlightOffersResponse;
@@ -19,10 +20,12 @@ public class FlightMapper {
 
     private final AmadeusApiClient amadeusApiClient;
     private final IataCache iataCache;
+    private final DictionaryService dictionaryService;
 
-    public FlightMapper(AmadeusApiClient amadeusApiClient, IataCache iataCache){
+    public FlightMapper(AmadeusApiClient amadeusApiClient, IataCache iataCache, DictionaryService dictionaryService){
         this.amadeusApiClient = amadeusApiClient;
         this.iataCache = iataCache;
+        this.dictionaryService = dictionaryService;
     }
 
     private static final DateTimeFormatter[] DATE_FORMATTERS = {
@@ -235,7 +238,8 @@ public class FlightMapper {
         endpoint.setTerminal(endpointData.getTerminal());
         endpoint.setAt(parseDateTime(endpointData.getAt()));
         endpoint.setIataCode(code);
-        endpoint.setAirportName(iataCache.airportName(code));
+        //endpoint.setAirportName(iataCache.airportName(code));
+        endpoint.setAirportName(dictionaryService.resolveAirportName(code));
 
         LocationInfo locationInfo = getLocationInfoFromSearchResponse(endpointData.getIataCode(), dictionaries);
         //endpoint.setAirportName(locationInfo.getAirportName());
@@ -252,12 +256,13 @@ public class FlightMapper {
         //endpoint.setIataCode(endpointData.getIataCode());
         endpoint.setTerminal(endpointData.getTerminal());
         endpoint.setAt(parseDateTime(endpointData.getAt()));
+        endpoint.setAirportName(dictionaryService.resolveAirportName(code));
 
         LocationInfo locationInfo = getLocationInfoFromAmadeus(endpointData.getIataCode(), dictionaries);
         //endpoint.setAirportName(locationInfo.getAirportName());
         endpoint.setCityName(locationInfo.getCityName());
         endpoint.setCountryCode(locationInfo.getCountryCode());
-        endpoint.setAirportName(iataCache.airportName(code));
+        //endpoint.setAirportName(iataCache.airportName(code));
 
         return endpoint;
     }
@@ -458,7 +463,6 @@ public class FlightMapper {
             info.setCityName(location.getCityCode());
             info.setCountryCode(location.getCountryCode());
             info.setAirportName(iataCache.airportName(iataCode));
-
         }
 
         return info;

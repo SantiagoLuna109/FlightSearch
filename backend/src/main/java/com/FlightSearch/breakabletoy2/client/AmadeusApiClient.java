@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -181,6 +182,14 @@ public class AmadeusApiClient {
         HttpHeaders h = createAuthHeaders();
         HttpEntity<Map<String,Object>> req = new HttpEntity<>(Map.of("data", List.of(offer)), h);
         return restTemplate.postForObject(uri, req, Map.class);
+    }
+
+    public Optional<LocationResponse.LocationData> getLocationByIata(String iata) {
+        LocationResponse lr = searchLocations(iata, "AIRPORT", 1);
+        if (lr != null && lr.getData() != null && !lr.getData().isEmpty()) {
+            return Optional.of(lr.getData().get(0));   
+        }
+        return Optional.empty();
     }
 
     public LocationResponse getLocationById(String locationId) {
