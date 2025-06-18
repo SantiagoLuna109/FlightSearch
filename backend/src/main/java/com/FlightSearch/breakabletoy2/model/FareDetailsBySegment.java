@@ -10,6 +10,7 @@ public class FareDetailsBySegment {
     @Setter
     @Getter
     private String travelerId;
+    private String fareclass;
     private String cabin;
     private String travelClass;
     private List<AmenityDetails> amenities;

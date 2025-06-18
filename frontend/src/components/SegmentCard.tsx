@@ -9,7 +9,8 @@ type Amenity = {
 type FareDetail = {
   travelerId: string
   cabin: string
-  fareClass: string
+  fareClass?: string
+  class? :string
   amenities: Amenity[]
 }
 
@@ -83,7 +84,7 @@ export default function SegmentCard({
               <div key={i} className="pl-4 py-1">
                 <p className="text-sm">
                   <strong>Traveler {fd.travelerId}:</strong>{' '}
-                  {fd.cabin}  {fd.fareClass}
+                  {fd.cabin}  {fd.fareClass || fd.class ? `/${fd.fareClass || fd.class}`: ''} 
                 </p>
                 <ul className="list-disc list-inside text-sm">
                   {fd.amenities.map((am, ai) => (
@@ -95,8 +96,6 @@ export default function SegmentCard({
                         <span className="text-xs text-green-600">
                           (Complimentary)
                         </span>
-
-                        
                       )}
                     </li>
                   ))}

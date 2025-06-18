@@ -243,7 +243,6 @@ public class FlightDetailsResponse {
         private String fareBasis;
         private String brandedFare;
         private String brandedFareLabel;
-        @JsonProperty("class")
         private String fareClass;
         private BaggageAllowance includedCheckedBags;
         private BaggageAllowance includedCabinBags;

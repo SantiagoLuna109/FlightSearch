@@ -5,11 +5,12 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import AirportCombo from './AirportCombo';
 import { useNavigate } from 'react-router-dom';
+const LS_KEY = 'flightSearchCriteria'; 
 
 type Request = {
   originLocationCode: string;
   destinationLocationCode: string;
-  departureDate: string;      
+  departureDate: string;
   returnDate?: string;
   currencyCode: 'USD' | 'MXN' | 'EUR';
   nonStop: boolean;
@@ -17,6 +18,14 @@ type Request = {
 };
 
 export default function FlightSearchForm() {
+  const saved: Partial<Request> | null = (() => {
+    try {
+      return JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    } catch {
+      return null;
+    }
+  })();
+
   const {
     control,
     register,
@@ -31,6 +40,7 @@ export default function FlightSearchForm() {
       currencyCode: 'USD',
       nonStop: false,
       adults: 1,
+      ...saved, 
     },
   });
 
@@ -45,6 +55,8 @@ export default function FlightSearchForm() {
     mutationFn: (payload: Request) =>
       axios.post('/api/v1/flights/search', payload).then((r) => r.data),
     onSuccess: (response, variables) => {
+      localStorage.setItem(LS_KEY, JSON.stringify(variables));
+
       const offers = Array.isArray(response) ? response : response.data ?? [];
       navigate('/results', { state: { offers, search: variables } });
     },
@@ -119,8 +131,6 @@ export default function FlightSearchForm() {
             </div>
           )}
         />
-
-        {/* Salu2 */}
         <Controller
           name="returnDate"
           control={control}
