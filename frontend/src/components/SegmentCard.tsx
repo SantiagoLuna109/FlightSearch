@@ -56,6 +56,11 @@ export default function SegmentCard({
           <span className="text-sm text-gray-600">
             {segment.carrierName}
           </span>
+          {segment.flightNumber && (
+            <span className="ml-2 text-sm">
+              • Flight {segment.flightNumber}
+            </span>
+          )}
         </p>
 
         {op &&
@@ -90,6 +95,8 @@ export default function SegmentCard({
                         <span className="text-xs text-green-600">
                           (Complimentary)
                         </span>
+
+                        
                       )}
                     </li>
                   ))}

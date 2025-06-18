@@ -34,6 +34,8 @@ export default function FlightCard({ offer, currencyCode, adults }: Props) {
   const airlineName = segOut[0].carrierName
   const op = segOut[0].operating?.carrierCode ?? ''
   const opName = segOut[0].operating?.carrierName ?? ''
+  const flightNumOut = segOut[0]?.flightNumber ?? ''
+  const flightNumBack = segBack[0]?.flightNumber ?? ''
 
   return (
     <div
@@ -56,6 +58,7 @@ export default function FlightCard({ offer, currencyCode, adults }: Props) {
           </p>
           <p className="text-sm">
             {airlineName} {airlineCode}
+            {flightNumOut && ` • Flight ${flightNumOut}`}
             {op && op !== airlineCode && ` — operated by ${opName} ${op}`}
           </p>
           <p className="text-sm">{dur(outbound)}</p>

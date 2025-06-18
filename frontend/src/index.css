@@ -35,6 +35,12 @@
   border-radius: 8px;
 }
 
+.checkDetails{
+  color: white;
+  background-color: rgba(59,59,59,255);
+  border-radius: 8px;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
