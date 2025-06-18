@@ -23,7 +23,13 @@ const layovers = (segs: any[]) =>
     : 'Non-stop'
 
 export default function FlightCard({ offer, currencyCode, adults }: Props) {
-  const intl = new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode })
+  const intl = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currencyCode,
+  })
+
+  const fmt = (val: number) => `${intl.format(val)} ${currencyCode}`
+
   const [outbound, inbound] = offer.itineraries
   const segOut = outbound.segments
   const segBack = inbound?.segments ?? []
@@ -39,10 +45,10 @@ export default function FlightCard({ offer, currencyCode, adults }: Props) {
 
   return (
     <div
-      className="border rounded shadow-sm bg-white overflow-hidden cursor-pointer"
+      className="border border-muted rounded shadow-sm bg-surface overflow-hidden cursor-pointer"
       onClick={() =>
         nav(`/details/${offer.id}`, {
-          state: { offer, search: { currency: currencyCode, currencyCode, adults } }
+          state: { offer, search: { currency: currencyCode, currencyCode, adults } },
         })
       }
     >
@@ -62,16 +68,16 @@ export default function FlightCard({ offer, currencyCode, adults }: Props) {
             {op && op !== airlineCode && ` — operated by ${opName} ${op}`}
           </p>
           <p className="text-sm">{dur(outbound)}</p>
-          <p className="text-xs text-gray-600">{layovers(segOut)}</p>
+          <p className="text-xs text-muted">{layovers(segOut)}</p>
         </div>
 
-        <div className="col-span-1 flex flex-col items-end justify-center border-l pl-3">
-          <p className="font-bold">{intl.format(total)}</p>
-          <p className="text-sm text-gray-600">total for {adults}</p>
+        <div className="col-span-1 flex flex-col items-end justify-center border-l border-muted pl-3">
+          <p className="font-bold">{fmt(total)}</p>
+          <p className="text-sm text-muted">total for {adults}</p>
           {adults > 1 && (
             <>
-              <p className="mt-1">{intl.format(per)}</p>
-              <p className="text-sm text-gray-600">per traveller</p>
+              <p className="mt-1">{fmt(per)}</p>
+              <p className="text-sm text-muted">per traveller</p>
             </>
           )}
         </div>
@@ -90,8 +96,10 @@ export default function FlightCard({ offer, currencyCode, adults }: Props) {
                 {segBack[0].departure.airportName} ({segBack[0].departure.iataCode}) →{' '}
                 {segBack.at(-1)!.arrival.airportName} ({segBack.at(-1)!.arrival.iataCode})
               </p>
+              {flightNumBack && (
+                <p className="text-sm">Flight {flightNumBack}</p>) }
               <p className="text-sm">{dur(inbound)}</p>
-              <p className="text-xs text-gray-600">{layovers(segBack)}</p>
+              <p className="text-xs text-muted">{layovers(segBack)}</p>
             </div>
           </div>
         </>
