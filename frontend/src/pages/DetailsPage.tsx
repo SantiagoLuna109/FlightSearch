@@ -3,6 +3,7 @@ import SegmentCard from '../components/SegmentCard';
 import StopCard from '../components/StopCard';
 import PriceSidebar from '../components/PriceSidebar';
 
+
 export default function DetailsPage() {
   const { state } = useLocation() as {
     state: { offer: any; search: any };
@@ -12,16 +13,16 @@ export default function DetailsPage() {
   const search = state.search;
 
   return (
-    <div className="p-6">
+    <div className="p-6 detailsCheck">
       <button
         onClick={() => navigate(-1)}
-        className="mb-6 inline-flex items-center text-sm text-blue-600 hover:underline"
+        className="mb-6 inline-flex items-center text-sm detailButton"
       >Back
       </button>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 detailsCheck">
+        <div className="md:col-span-2 space-y-8 detailsCheck">
           {offer.itineraries.map((it: any, idx: number) => (
-            <div key={idx} className="space-y-6">
+            <div key={idx} className="space-y-6 detailsCheck">
               {offer.itineraries.length > 1 && (
                 <p className="text-lg font-semibold">
                   {idx === 0 ? 'Outbound' : 'Return'}
@@ -29,7 +30,7 @@ export default function DetailsPage() {
               )}
 
               {it.segments.map((seg: any, sIdx: number) => (
-                <div key={`${idx}-${sIdx}`} className="checkDetails"> 
+                <div key={`${idx}-${sIdx}`} className="detailsCheck"> 
                 <SegmentCard
                   index={sIdx + 1}
                   segment={seg}

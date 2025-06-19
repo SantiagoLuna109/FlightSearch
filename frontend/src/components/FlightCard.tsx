@@ -45,15 +45,15 @@ export default function FlightCard({ offer, currencyCode, adults }: Props) {
 
   return (
     <div
-      className="border border-muted rounded shadow-sm bg-surface overflow-hidden cursor-pointer"
+      className="border-muted rounded shadow-sm bg-surface overflow-hidden cursor-pointer "
       onClick={() =>
         nav(`/details/${offer.id}`, {
           state: { offer, search: { currency: currencyCode, currencyCode, adults } },
         })
       }
     >
-      <div className="grid grid-cols-4 p-4 gap-2">
-        <div className="col-span-3 space-y-1">
+      <div className="grid grid-cols-4 p-4 gap-2 cardCheck">
+        <div className="col-span-3 space-y-1 cardCheck">
           <p className="font-semibold">
             {format(iso(segOut[0].departure.at), 'MMM d, h:mmaaa')} –{' '}
             {format(iso(segOut.at(-1)!.arrival.at), 'MMM d, h:mmaaa')}
@@ -71,7 +71,7 @@ export default function FlightCard({ offer, currencyCode, adults }: Props) {
           <p className="text-xs text-muted">{layovers(segOut)}</p>
         </div>
 
-        <div className="col-span-1 flex flex-col items-end justify-center border-l border-muted pl-3">
+        <div className="col-span-1 flex flex-col items-end justify-center border-l border-muted pl-3 cardCheck">
           <p className="font-bold">{fmt(total)}</p>
           <p className="text-sm text-muted">total for {adults}</p>
           {adults > 1 && (

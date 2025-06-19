@@ -38,8 +38,8 @@ export default function SegmentCard({
   const fares: FareDetail[] = segment.fareDetailsBySegment || []
 
   return (
-    <div className="border rounded p-4 grid md:grid-cols-4 gap-4">
-      <div className="md:col-span-3 space-y-2">
+    <div className="border rounded p-4 grid md:grid-cols-4 gap-4 segmentCheck">
+      <div className="md:col-span-3 space-y-2 segmentCheck">
         <p className="font-semibold">Segment {index}</p>
 
         <p>
@@ -54,7 +54,7 @@ export default function SegmentCard({
 
         <p>
           <strong>{segment.carrierCode}</strong>{' '}
-          <span className="text-sm text-gray-600">
+          <span className="text-sm  text-black">
             {segment.carrierName}
           </span>
           {segment.flightNumber && (
@@ -78,13 +78,13 @@ export default function SegmentCard({
         </p>
 
         {fares.length > 0 && (
-          <div className="pt-2">
-            <p className="font-medium">Traveler Fare Details:</p>
+          <div className="pt-2 ">
+            <p className="font-medium ">Traveler Fare Details:</p>
             {fares.map((fd, i) => (
-              <div key={i} className="pl-4 py-1">
+              <div key={i} className="pl-4 py-1 ">
                 <p className="text-sm">
                   <strong>Traveler {fd.travelerId}:</strong>{' '}
-                  {fd.cabin}  {fd.fareClass || fd.class ? `/${fd.fareClass || fd.class}`: ''} 
+                  {fd.cabin}  {fd.fareClass || fd.class ? `${fd.fareClass || fd.class}`: ''} 
                 </p>
                 <ul className="list-disc list-inside text-sm">
                   {fd.amenities.map((am, ai) => (

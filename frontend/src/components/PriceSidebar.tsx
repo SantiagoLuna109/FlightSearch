@@ -13,15 +13,15 @@ type Props = {
     const per = total / adults
   
     return (
-      <div className="border rounded p-4 space-y-4">
-        <div>
+      <div className="border rounded p-4 space-y-4 segmentCheck">
+        <div className="segmentCheck">
           <p className="font-semibold mb-1">Price Breakdown</p>
           <p>Base&nbsp;&nbsp;{fmt(base)}</p>
           <p>Fees&nbsp;&nbsp;{fmt(fees)}</p>
           <p className="font-bold mt-2">Total&nbsp;&nbsp;{fmt(total)}</p>
         </div>
   
-        <div className="border p-3">
+        <div className="border p-3 segmentCheck">
           <p className="font-semibold mb-1">Per Traveler</p>
           <p>{fmt(per)}</p>
         </div>

@@ -5,20 +5,34 @@
 @layer base {
   html {
     @apply bg-white text-gray-900;
-    color-scheme: light dark;
+    /*color-scheme: light dark;*/
+    background-color: #CBD2D0;
   }
-  @media (prefers-color-scheme: dark) {
+  @media (prefers-color-scheme: light) {
     html {
-      @apply bg-gray-900 text-gray-100;
+      @apply text-gray-100;
     }
   }
 }
 .checkPagination{
-  background-color: rgba(59,59,59,255);
+  background-color: #02020A;
+}
+
+.detailsCheck{
+  background-color: #02020A;
+  border-radius: 8px;
+}
+
+.detailButton{
+  background-color: #05204A;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  color: #FFFDFD;
+  margin-right: 95%;
 }
 
 .pagination-button{
-  background-color: rgba(26,26,26,255);
+  background-color: #05204A;
 }
 
 .checkbutton{
@@ -27,17 +41,20 @@
 }
 
 .checkSearch{
-  background-color: rgba(36,36,36,255);
+  background-color: #CBD2D0;
+  border-radius: 8px;
 }
 
 .checkSearchForm{
-  background-color: rgba(59,59,59,255);
+  background-color: #02020A;
+  color: #FFFDFD;
   border-radius: 8px;
 }
 
 .checkDetails{
-  color: white;
-  background-color: rgba(59,59,59,255);
+  color: #FFFDFD;
+  background-color:  #02020A;
+  border-color: #f9f9f9;
   border-radius: 8px;
 }
 
@@ -63,6 +80,28 @@ a {
 }
 a:hover {
   color: rgba(26,26,26,255);
+}
+
+.searchButton{
+  background-color: #05204A;
+}
+
+.cardCheck{
+  background-color: #6E8898;
+  color: #02020A;
+  border-color: #02020A;
+}
+
+.segmentCheck{
+  background-color: #6E8898;
+  color: #02020A;
+  border-color: #02020A;
+  border-radius: 4px;
+}
+
+.dataCheck{
+  background-color: greenyellow;
+  border-color: greenyellow;
 }
 
 body {
@@ -114,7 +153,7 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
+    color: #242424;
     background-color: #ffffff;
   }
   a:hover {
@@ -126,5 +165,5 @@ button:focus-visible {
 }
 
 .checklist{
-  background-color: #3c3c3c;
+  background-color: #242424;
 }

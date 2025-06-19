@@ -49,10 +49,10 @@ export default function ResultsPage() {
       </button>
 
       <div className="flex items-center space-x-4 mb-4 checkSearchForm">
-        <button onClick={() => setPriceAsc(!priceAsc)} className="border rounded px-3 py-1">
+        <button onClick={() => setPriceAsc(!priceAsc)} className="border rounded px-3 py-1 pagination-button">
           Price {priceAsc ? '⬆' : '⬇'}
         </button>
-        <button onClick={() => setDurAsc(!durAsc)} className="border rounded px-3 py-1">
+        <button onClick={() => setDurAsc(!durAsc)} className="border rounded px-3 py-1 pagination-button">
           Duration {durAsc ? '⬆' : '⬇'}
         </button>
       </div>

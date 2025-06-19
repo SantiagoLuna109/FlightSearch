@@ -8,16 +8,16 @@
   
   .pagination button {
     padding: 4px 8px;
-    border: 1px solid #d4d4d4;
-    background: rgba(26,26,26,255);
+    background: #05204A;
     cursor: pointer;
   }
   
   .pagination button:disabled {
-    opacity: 0.4;
+    opacity: 0.5;
     cursor: default;
   }
   
   .ellipsis {
     margin: 0 6px;
   }
+
