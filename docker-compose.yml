@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    networks:
+      - flight-net
+
+  frontend:
+    build: ./frontend
+    env_file: .env
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - flight-net
+
+networks:
+  flight-net:
+    driver: bridge

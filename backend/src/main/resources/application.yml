@@ -15,6 +15,12 @@ currency:
       - EUR
       - MXN
 
+managment:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+
 amadeus:
   api:
     base-url: https://test.api.amadeus.com
