@@ -1,22 +1,43 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: flight-search-api
 
 server:
   port: 8080
 
+currency:
+  conversion:
+    enable: true
+    offline: true
+    rates-date: "2025-01-10"
+    supported-currencies:
+      - USD
+      - EUR
+      - MXN
+
+managment:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+
 amadeus:
+  clientId: ${AMADEUS_CLIENT_ID}
+  clientSecret: ${AMADEUS_CLIENT_SECRET}
   api:
     base-url: https://test.api.amadeus.com
     base-url-v1: ${amadeus.api.base-url}/v1
     base-url-v2: ${amadeus.api.base-url}/v2
     auth-url: ${amadeus.api.base-url}/v1/security/oauth2/token
-    key: ${AMADEUS_API_SECRET} #Change this wiht your own API Key
-    secret: ${AMADEUS_API_SECRET} #CHange this wiht your own API secret
+    key: ${AMADEUS_CLIENT_ID} #Change this wiht your own API Key
+    secret: ${AMADEUS_CLIENT_SECRET} #CHange this wiht your own API secret
   token:
     expiry-buffer: 300
 
 logging:
   level:
+    root: INFO
     com.FlightSearch.breakabletoy2: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG

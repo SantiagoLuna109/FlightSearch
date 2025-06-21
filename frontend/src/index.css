@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-white text-gray-900;
+    /*color-scheme: light dark;*/
+    background-color: #CBD2D0;
+  }
+  @media (prefers-color-scheme: light) {
+    html {
+      @apply text-gray-100;
+    }
+  }
+}
+.checkPagination{
+  background-color: #02020A;
+}
+
+.detailsCheck{
+  background-color: #02020A;
+  border-radius: 8px;
+}
+
+.detailButton{
+  background-color: #05204A;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  color: #FFFDFD;
+  margin-right: 95%;
+}
+
+.pagination-button{
+  background-color: #05204A;
+}
+
+.checkbutton{
+  background-color: rgba(36,36,36,255);
+  color: white;
+}
+
+.checkSearch{
+  background-color: #CBD2D0;
+  border-radius: 8px;
+}
+
+.checkSearchForm{
+  background-color: #02020A;
+  color: #FFFDFD;
+  border-radius: 8px;
+}
+
+.checkDetails{
+  color: #FFFDFD;
+  background-color:  #02020A;
+  border-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: rgba(26,26,26,255);
+  text-decoration: inherit;
+}
+a:hover {
+  color: rgba(26,26,26,255);
+}
+
+.searchButton{
+  background-color: #05204A;
+}
+
+.cardCheck{
+  background-color: #6E8898;
+  color: #02020A;
+  border-color: #02020A;
+}
+
+.segmentCheck{
+  background-color: #6E8898;
+  color: #02020A;
+  border-color: #02020A;
+  border-radius: 4px;
+}
+
+.dataCheck{
+  background-color: greenyellow;
+  border-color: greenyellow;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+div {
+  background-color: #242424;
+}
+
+.checkButtonDetails{
+  width: 12%;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  color: #f9f9f9;
+}
+.checkButtonDetails:hover {
+  border-color: rgba(26,26,26,255);
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: rgba(26,26,26,255);
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #242424;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: rgba(26,26,26,255);
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+.checklist{
+  background-color: #242424;
+}

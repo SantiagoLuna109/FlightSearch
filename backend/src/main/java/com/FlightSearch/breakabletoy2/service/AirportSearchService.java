@@ -123,7 +123,7 @@ public class AirportSearchService {
         }
     }
 
-    public Airport getAirportByCode(String code) {
+    /*public Airport getAirportByCode(String code) {
         try {
             logger.info("Getting airport details for code: '{}'", code);
 
@@ -173,8 +173,21 @@ public class AirportSearchService {
             logger.error("Unexpected error during airport lookup: {}", e.getMessage(), e);
             throw new AmadeusApiException("Unexpected error during airport lookup: " + e.getMessage(), e);
         }
-    }
+    }*/
 
+    public Airport getAirportByCode(String rawCode) {
+        String code = rawCode == null ? null : rawCode.trim().toUpperCase();
+
+        if (code == null || code.length() != 3) {
+            throw new IllegalArgumentException("IATA code must be exactly 3 letters: " + rawCode);
+        }
+
+        LocationResponse.LocationData loc = amadeusApiClient.getLocationByIata(code)
+                .orElseThrow(() ->
+                        new AirportNotFoundException("Airport with code '" + code + "' not found"));
+
+        return airportMapper.toAirport(loc);
+    }
 
     public List<Airport> searchAirportsOnly(String keyword, int limit) {
         return searchAirports(keyword, "AIRPORT", limit);

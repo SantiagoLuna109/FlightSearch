@@ -1,0 +1,13 @@
+# don't send dependencies / build artefacts
+node_modules
+dist
+
+# Vite / React cruft
+npm-debug.log
+.yarn
+.pnpm
+
+# misc
+.DS_Store
+.idea
+.vscode
